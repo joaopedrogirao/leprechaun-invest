@@ -1,0 +1,69 @@
+<div class="pagina">
+
+  <div class="lado-imagem">
+    <img src="logo.png" alt="Investimentos" />
+  </div>
+
+  <div class="lado-form">
+    <div class="card-form">
+
+      <h1>Boas-vindas!</h1>
+
+      <form [formGroup]="form" (ngSubmit)="entrar()">
+
+        <mat-form-field appearance="outline" class="campo">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="seuemail@example.com"
+          />
+          @if (form.get('email')?.hasError('required')) {
+            <mat-error>Email obrigatório</mat-error>
+          }
+          @if (form.get('email')?.hasError('email')) {
+            <mat-error>Email inválido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="campo">
+          <mat-label>Senha</mat-label>
+          <input
+            matInput
+            [type]="senhaVisivel ? 'text' : 'senha'"
+            formControlName="senha"
+            placeholder="Digite sua senha"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="toggleSenha()"
+          >
+            <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('senha')?.hasError('required')) {
+            <mat-error>Senha obrigatória</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="btn-entrar"
+          [disabled]="form.invalid"
+        >
+          Entrar
+        </button>
+
+      </form>
+
+      <p class="cadastro">
+        Não tem conta? <a routerLink="/cadastro">Cadastre-se</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
