@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -31,6 +33,7 @@ public class Usuario implements UserDetails {
         this.senha = senhaCripitografada;
     }
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private PerfilInvestidor perfilInvestidor;
 

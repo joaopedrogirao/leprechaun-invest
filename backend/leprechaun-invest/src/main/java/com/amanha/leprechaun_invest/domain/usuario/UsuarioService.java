@@ -22,7 +22,7 @@ public class UsuarioService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
-    public void cadastrarUsuario(CadastroDTO dados) {
+    public Usuario cadastrarUsuario(CadastroDTO dados) {
         if (usuarioRepository.findByEmailIgnoreCase(dados.email()).isPresent()) {
             throw new RuntimeException("Email já cadastrado");
         }
@@ -30,7 +30,7 @@ public class UsuarioService implements UserDetailsService {
         String senhaCripitografada = passwordEncoder.encode(dados.senha());
 
         Usuario usuario = new Usuario(dados, senhaCripitografada);
-        usuarioRepository.save(usuario);
+        return usuarioRepository.save(usuario);
     }
 
 
