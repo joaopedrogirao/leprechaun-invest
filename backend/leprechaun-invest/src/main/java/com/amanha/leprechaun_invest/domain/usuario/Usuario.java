@@ -34,6 +34,10 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private PerfilInvestidor perfilInvestidor;
 
+    public void definirPerfilInvestidor(PerfilInvestidor perfil) {
+        this.perfilInvestidor = perfil;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
