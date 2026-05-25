@@ -28,7 +28,6 @@ public class UsuarioService implements UserDetailsService {
         }
 
         String senhaCripitografada = passwordEncoder.encode(dados.senha());
-
         Usuario usuario = new Usuario(dados, senhaCripitografada);
         usuarioRepository.save(usuario);
     }
