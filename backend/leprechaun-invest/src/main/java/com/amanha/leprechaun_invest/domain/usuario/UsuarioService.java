@@ -1,5 +1,7 @@
 package com.amanha.leprechaun_invest.domain.usuario;
 
+import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,6 +24,7 @@ public class UsuarioService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
+    @Transactional
     public void cadastrarUsuario(CadastroDTO dados) {
         if (usuarioRepository.findByEmailIgnoreCase(dados.email()).isPresent()) {
             throw new RuntimeException("Email já cadastrado");
@@ -31,6 +34,32 @@ public class UsuarioService implements UserDetailsService {
         Usuario usuario = new Usuario(dados, senhaCripitografada);
         usuarioRepository.save(usuario);
     }
+
+    @Transactional
+    public UsuarioDTO definirPerfilInvestidor(Long idUsuario, QuizPerfilUsuarioDTO dados){
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("usuario não encontrado"));
+
+        int pontuacao = dados.respostas()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        PerfilInvestidor perfil;
+
+        if (pontuacao <= 6){
+            perfil = PerfilInvestidor.CONSERVADOR;
+        }else if (pontuacao <= 10){
+            perfil = PerfilInvestidor.MODERADO;
+        } else {
+            perfil = PerfilInvestidor.ARROJADO;
+        }
+
+        usuario.definirPerfilInvestidor(perfil);
+
+        return new UsuarioDTO(usuario);
+    }
+
 
 
 }
