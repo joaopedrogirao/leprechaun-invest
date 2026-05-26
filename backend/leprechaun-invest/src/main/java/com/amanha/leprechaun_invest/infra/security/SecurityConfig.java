@@ -42,9 +42,15 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("senha")
                         .successHandler((request, response, authentication) -> {
+                            System.out.println("LOGIN FEITO COM SUCESSO");
                             response.setStatus(200);
                         })
                         .failureHandler((request, response, exception) -> {
+                            System.out.println("===== ERRO NO LOGIN =====");
+                            System.out.println("Email recebido: " + request.getParameter("email"));
+                            System.out.println("Senha recebida: " + request.getParameter("senha"));
+                            System.out.println("Tipo do erro: " + exception.getClass().getName());
+                            System.out.println("Mensagem: " + exception.getMessage());
                             response.setStatus(401);
                         })
                         .permitAll()
