@@ -37,7 +37,6 @@ export class Login {
   entrar(): void {
     if (this.form.valid) {
       const { email, senha } = this.form.value;
-      // TODO: integrar com serviço de autenticação
       console.log('Login:', email, senha);
       this.router.navigate(['/app/dashboard']);
     }

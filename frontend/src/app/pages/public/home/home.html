@@ -1,1 +1,83 @@
-<p>home works!</p>
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <img src="logo.png" alt="Leprechaun.invest" class="hero-img">
+    <p class="hero-subtitle">Uma abordagem simples para investimentos precisos</p>
+    <div class="hero-actions">
+      <a mat-flat-button routerLink="/cadastro" class="btn-comecar" id="btn-comecar">
+        Começar a investir
+      </a>
+      <a mat-stroked-button href="#sobre" class="btn-sobre" id="btn-sobre-nos">
+        Quem somos nós?
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="features-grid">
+
+    <mat-card appearance="outlined" class="feature-card">
+      <mat-card-content>
+        <div class="feature-icon">
+          <mat-icon>show_chart</mat-icon>
+        </div>
+        <h3 class="feature-title">Simulações</h3>
+        <p class="feature-desc">Guie suas tomadas de decisão a partir de uma simulação</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="feature-card">
+      <mat-card-content>
+        <div class="feature-icon">
+          <mat-icon>shield</mat-icon>
+        </div>
+        <h3 class="feature-title">Segurança</h3>
+        <p class="feature-desc">Investimentos seguros</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="feature-card">
+      <mat-card-content>
+        <div class="feature-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <h3 class="feature-title">Crescimento Sustentável</h3>
+        <p class="feature-desc">Acumule patrimônio de acordo com seu perfil</p>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</section>
+
+<mat-divider></mat-divider>
+
+<section class="sobre" id="sobre">
+  <div class="sobre-container">
+    <h2 class="sobre-title">Sobre</h2>
+    <p class="sobre-text">
+      Nossa plataforma ajuda investidores a simular investimentos e receber recomendações personalizadas
+      de acordo com seu perfil.
+    </p>
+
+    <div class="sobre-checklist">
+      <div class="check-item">
+        <mat-icon class="check-icon">check</mat-icon>
+        <span>Simulações inteligentes</span>
+      </div>
+      <div class="check-item">
+        <mat-icon class="check-icon">check</mat-icon>
+        <span>Recomendações personalizadas</span>
+      </div>
+      <div class="check-item">
+        <mat-icon class="check-icon">check</mat-icon>
+        <span>Investimentos de acordo com seu perfil</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="footer">
+  <div class="footer-container">
+    <p>&copy; 2026 Leprechaun.invest — Todos os direitos reservados.</p>
+  </div>
+</footer>
