@@ -3,6 +3,7 @@ package com.amanha.leprechaun_invest.domain.usuario;
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -61,5 +62,10 @@ public class UsuarioService implements UserDetailsService {
     }
 
 
+    public Usuario buscarUsuarioLogado(Authentication authentication) {
+        String email = authentication.getName();
 
+        return usuarioRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
+    }
 }
