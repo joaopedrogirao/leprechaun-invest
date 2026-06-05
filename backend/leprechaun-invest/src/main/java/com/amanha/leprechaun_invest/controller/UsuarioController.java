@@ -4,9 +4,13 @@ import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuario
 import com.amanha.leprechaun_invest.domain.usuario.CadastroDTO;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioDTO;
+import com.amanha.leprechaun_invest.domain.usuario.UsuarioRepository;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.security.Principal;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
     private final UsuarioService usuarioService;
+    private final UsuarioRepository repository;
 
     @PostMapping
     public ResponseEntity cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
@@ -32,8 +37,10 @@ public class UsuarioController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UsuarioDTO> buscarPerfilLogado(@AuthenticationPrincipal Usuario usuarioLogado) {
+    public ResponseEntity<UsuarioDTO> buscarPerfilLogado(Principal principal) {
+        Usuario usuarioLogado = repository.findByEmailIgnoreCase(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                
         return ResponseEntity.ok(new UsuarioDTO(usuarioLogado));
     }
-
 }
