@@ -5,10 +5,10 @@ import com.amanha.leprechaun_invest.domain.usuario.PerfilInvestidor;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,7 +19,14 @@ public class SimulacaoService {
     @Autowired
     private InvestimentoRepository investimentoRepository;
 
-    public SimulacaoResponse calcular(@RequestBody SimulacaoRequest request, Usuario usuario) {
+    @Autowired
+    private SimulacaoRepository simulacaoRepository;
+
+    public SimulacaoResponse calcular(SimulacaoRequest request, Usuario usuario) {
+        return executarCalculo(request, usuario).response();
+    }
+
+    private ResultadoCalculo executarCalculo(SimulacaoRequest request, Usuario usuario) {
 
         PerfilInvestidor perfilUsuario = usuario.getPerfilInvestidor();
 
@@ -30,7 +37,12 @@ public class SimulacaoService {
         BigDecimal taxaAnual = buscarTaxaAnualTemporaria(investimentoRecomendado);
         BigDecimal taxaMensal = converterTaxaAnualParaMensal(taxaAnual);
 
-        List<ProjecaoMensalDTO> projecoes = calcularProjecaoMensal(request.valorInicial(), request.aporteMensal(), request.periodoMeses(), taxaMensal);
+        List<ProjecaoMensalDTO> projecoes = calcularProjecaoMensal(
+                request.valorInicial(),
+                request.aporteMensal(),
+                request.periodoMeses(),
+                taxaMensal
+        );
 
         BigDecimal valorFinal = projecoes.getLast().saldoFinal();
 
@@ -58,10 +70,18 @@ public class SimulacaoService {
                 totalRendimento
         );
 
-        return new SimulacaoResponse(
+        SimulacaoResponse response = new SimulacaoResponse(
                 investimentoDTO,
                 resumo,
                 projecoes
+        );
+
+        return new ResultadoCalculo(
+                investimentoRecomendado,
+                horizonte,
+                taxaAnual,
+                taxaMensal,
+                response
         );
     }
 
@@ -230,6 +250,133 @@ public class SimulacaoService {
                 + ", possui nível de risco "
                 + investimento.getNivelRisco()
                 + " e respeita o nível de risco desejado.";
+    }
+
+    public SimulacaoResponse salvar(SimulacaoSalvarRequest request, Usuario usuario) {
+
+        SimulacaoRequest requestCalculo = new SimulacaoRequest(
+                request.valorInicial(),
+                request.aporteMensal(),
+                request.periodoMeses(),
+                request.objetivo(),
+                request.nivelRiscoDesejado()
+        );
+
+        ResultadoCalculo resultado = executarCalculo(requestCalculo, usuario);
+
+        SimulacaoResponse response = resultado.response();
+        Investimento investimento = resultado.investimento();
+
+        Simulacao simulacao = new Simulacao();
+
+        simulacao.setNome(request.nome());
+        simulacao.setUsuario(usuario);
+        simulacao.setInvestimento(investimento);
+
+        simulacao.setValorInicial(request.valorInicial());
+        simulacao.setAporteMensal(request.aporteMensal());
+        simulacao.setPeriodoMeses(request.periodoMeses());
+
+        simulacao.setObjetivo(request.objetivo());
+        simulacao.setNivelRiscoDesejado(request.nivelRiscoDesejado());
+        simulacao.setHorizonte(resultado.horizonte());
+
+        simulacao.setTaxaAnualUsada(resultado.taxaAnual());
+        simulacao.setTaxaMensalUsada(resultado.taxaMensal());
+
+        simulacao.setValorFinal(response.resumo().valorFinal());
+        simulacao.setTotalInvestido(response.resumo().totalInvestido());
+        simulacao.setTotalRendimento(response.resumo().totalRendimento());
+
+        simulacao.setCodigoApiUsado(investimento.getCodigoApi());
+        simulacao.setDataCriacao(LocalDateTime.now());
+
+        for (ProjecaoMensalDTO dto : response.projecaoMensal()) {
+            ProjecaoMensal projecao = new ProjecaoMensal(
+                    dto.mes(),
+                    dto.saldoInicial(),
+                    dto.aporte(),
+                    dto.rendimento(),
+                    dto.saldoFinal()
+            );
+
+            simulacao.adicionarProjecao(projecao);
+        }
+
+        Simulacao simulacaoSalva = simulacaoRepository.save(simulacao);
+
+        return toResponse(simulacaoSalva);
+    }
+
+    public List<SimulacaoListagemDTO> listarDoUsuario(Usuario usuario) {
+        return simulacaoRepository
+                .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId())
+                .stream()
+                .map(this::toResumoDTO)
+                .toList();
+    }
+
+    private SimulacaoListagemDTO toResumoDTO(Simulacao simulacao) {
+        return new SimulacaoListagemDTO(
+                simulacao.getId(),
+                simulacao.getNome(),
+                simulacao.getInvestimento().getNome(),
+                simulacao.getValorInicial(),
+                simulacao.getAporteMensal(),
+                simulacao.getPeriodoMeses(),
+                simulacao.getValorFinal(),
+                simulacao.getTotalRendimento(),
+                simulacao.getDataCriacao()
+        );
+    }
+
+    public SimulacaoResponse buscarDetalhes(Long id, Usuario usuario) {
+        Simulacao simulacao = simulacaoRepository
+                .findByIdAndUsuarioId(id, usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Simulação não encontrada"));
+
+        return toResponse(simulacao);
+    }
+
+    private SimulacaoResponse toResponse(Simulacao simulacao) {
+        Investimento investimento = simulacao.getInvestimento();
+
+        InvestimentoRecomendadoDTO investimentoDTO = new InvestimentoRecomendadoDTO(
+                investimento.getId(),
+                investimento.getNome(),
+                investimento.getTipo().name(),
+                investimento.getNivelRisco().name(),
+                investimento.getPerfilRecomendado().name(),
+                "Este investimento foi recomendado para esta simulação salva."
+        );
+
+        SimulacaoResumoDTO resumo = new SimulacaoResumoDTO(
+                simulacao.getValorInicial(),
+                simulacao.getAporteMensal(),
+                simulacao.getPeriodoMeses(),
+                simulacao.getTaxaMensalUsada(),
+                simulacao.getValorFinal(),
+                simulacao.getTotalInvestido(),
+                simulacao.getTotalRendimento()
+        );
+
+        List<ProjecaoMensalDTO> projecoes = simulacao.getProjecoesMensais()
+                .stream()
+                .sorted(Comparator.comparing(ProjecaoMensal::getMes))
+                .map(p -> new ProjecaoMensalDTO(
+                        p.getMes(),
+                        p.getSaldoInicial(),
+                        p.getAporte(),
+                        p.getRendimento(),
+                        p.getSaldoFinal()
+                ))
+                .toList();
+
+        return new SimulacaoResponse(
+                investimentoDTO,
+                resumo,
+                projecoes
+        );
     }
 
 }
