@@ -1,6 +1,7 @@
 package com.amanha.leprechaun_invest.domain.simulacao;
 
 import com.amanha.leprechaun_invest.domain.Investimento.*;
+import com.amanha.leprechaun_invest.domain.indicador.IndicadorFinanceiroService;
 import com.amanha.leprechaun_invest.domain.usuario.PerfilInvestidor;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class SimulacaoService {
     @Autowired
     private SimulacaoRepository simulacaoRepository;
 
+    @Autowired
+    private IndicadorFinanceiroService indicadorFinanceiroService;
+
     public SimulacaoResponse calcular(SimulacaoRequest request, Usuario usuario) {
         return executarCalculo(request, usuario).response();
     }
@@ -34,7 +38,9 @@ public class SimulacaoService {
 
         Investimento investimentoRecomendado = recomendarInvestimento(perfilUsuario, request, horizonte);
 
-        BigDecimal taxaAnual = buscarTaxaAnualTemporaria(investimentoRecomendado);
+        //BigDecimal taxaAnual = buscarTaxaAnualTemporaria(investimentoRecomendado);
+
+        BigDecimal taxaAnual = indicadorFinanceiroService.buscarTaxaAnual(investimentoRecomendado);
         BigDecimal taxaMensal = converterTaxaAnualParaMensal(taxaAnual);
 
         List<ProjecaoMensalDTO> projecoes = calcularProjecaoMensal(
@@ -155,44 +161,44 @@ public class SimulacaoService {
         return HorizonteInvestimento.LONGO;
     }
 
-    private BigDecimal buscarTaxaAnualTemporaria(Investimento investimento){
-
-        /*
-         * Primeira versão:
-         * usa taxa temporária.
-         *
-         * Depois:
-         * trocar isso por uma chamada para a API externa,
-         * investimento.getCodigoApi().
-         */
-
-        String codigoApi = investimento.getCodigoApi();
-
-        BigDecimal taxaBase = switch (codigoApi) {
-            case "SELIC" -> BigDecimal.valueOf(10.50);
-            case "CDI" -> BigDecimal.valueOf(10.40);
-            case "IPCA" -> BigDecimal.valueOf(4.50);
-            case "HGLG11" -> BigDecimal.valueOf(9.60);
-            case "PETR4" -> BigDecimal.valueOf(14.00);
-            case "BOVA11" -> BigDecimal.valueOf(12.00);
-            default -> BigDecimal.valueOf(10.00);
-        };
-
-        if (investimento.getIndexador() == Indexador.IPCA) {
-            BigDecimal taxaFixa = investimento.getTaxaFixaAnual() != null
-                    ? investimento.getTaxaFixaAnual()
-                    : BigDecimal.ZERO;
-
-            return taxaBase.add(taxaFixa);
-        }
-
-        if (investimento.getPercentualIndexador() != null) {
-            return taxaBase
-                    .multiply(investimento.getPercentualIndexador())
-                    .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
-        }
-        return taxaBase;
-    }
+//    private BigDecimal buscarTaxaAnualTemporaria(Investimento investimento){
+//
+//        /*
+//         * Primeira versão:
+//         * usa taxa temporária.
+//         *
+//         * Depois:
+//         * trocar isso por uma chamada para a API externa,
+//         * investimento.getCodigoApi().
+//         */
+//
+//        String codigoApi = investimento.getCodigoApi();
+//
+//        BigDecimal taxaBase = switch (codigoApi) {
+//            case "SELIC" -> BigDecimal.valueOf(10.50);
+//            case "CDI" -> BigDecimal.valueOf(10.40);
+//            case "IPCA" -> BigDecimal.valueOf(4.50);
+//            case "HGLG11" -> BigDecimal.valueOf(9.60);
+//            case "PETR4" -> BigDecimal.valueOf(14.00);
+//            case "BOVA11" -> BigDecimal.valueOf(12.00);
+//            default -> BigDecimal.valueOf(10.00);
+//        };
+//
+//        if (investimento.getIndexador() == Indexador.IPCA) {
+//            BigDecimal taxaFixa = investimento.getTaxaFixaAnual() != null
+//                    ? investimento.getTaxaFixaAnual()
+//                    : BigDecimal.ZERO;
+//
+//            return taxaBase.add(taxaFixa);
+//        }
+//
+//        if (investimento.getPercentualIndexador() != null) {
+//            return taxaBase
+//                    .multiply(investimento.getPercentualIndexador())
+//                    .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
+//        }
+//        return taxaBase;
+//    }
 
     private BigDecimal converterTaxaAnualParaMensal(BigDecimal taxaAnualPercentual) {
         double taxaAnualDecimal = taxaAnualPercentual
@@ -377,6 +383,14 @@ public class SimulacaoService {
                 resumo,
                 projecoes
         );
+    }
+
+    public void deletar(Long id, Usuario usuario) {
+        Simulacao simulacao = simulacaoRepository
+                .findByIdAndUsuarioId(id, usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Simulação não encontrada"));
+
+        simulacaoRepository.delete(simulacao);
     }
 
 }
