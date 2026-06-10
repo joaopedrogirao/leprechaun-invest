@@ -1,5 +1,8 @@
 package com.amanha.leprechaun_invest.controller;
 
+import com.amanha.leprechaun_invest.domain.comparar.ComparacaoService;
+import com.amanha.leprechaun_invest.domain.comparar.ComparacaoSimulacoesResponse;
+import com.amanha.leprechaun_invest.domain.comparar.CompararSimulacoesRequest;
 import com.amanha.leprechaun_invest.domain.simulacao.*;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioService;
@@ -20,6 +23,8 @@ public class SimulacaoController {
 
     private final UsuarioService usuarioService;
 
+    private final ComparacaoService comparacaoService;
+
     @PostMapping("/calcular")
     public SimulacaoResponse calcular(@Valid @RequestBody SimulacaoRequest request, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
@@ -31,6 +36,13 @@ public class SimulacaoController {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
 
         return simulacaoService.salvar(request, usuario);
+    }
+
+    @PostMapping("/comparar")
+    public ComparacaoSimulacoesResponse comparar(@RequestBody CompararSimulacoesRequest request, Authentication authentication) {
+        Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
+
+        return comparacaoService.comparar(request, usuario);
     }
 
     @GetMapping
