@@ -1,4 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import{
+  DashboardService,
+  GraficoRendimento,
+  MelhorSimulacao,
+  RecomendacaoPersonalizada,
+  ResumoCarteira
+} from '../../../core/services/dashboard.service'
 
 @Component({
   selector: 'app-dashboard',
@@ -6,4 +13,66 @@ import { Component } from '@angular/core';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {}
+export class Dashboard implements OnInit{
+
+  private dashboardService = inject(DashboardService);
+
+  carregando = signal(true);
+  erroCarregamento = signal('');
+
+  resumoCarteira = signal<ResumoCarteira>({
+    totalInvestido: 0,
+    lucroAcumulado: 0,
+    rentabilidadePercentual: 0,
+    patrimonioProjetado: 0
+  });
+
+  recomendacoesPersonalizadas = signal<RecomendacaoPersonalizada[]>([]);
+  melhorSimulacao = signal<MelhorSimulacao | null>(null);
+  graficoRendimentos = signal<GraficoRendimento[]>([]);
+
+  ngOnInit(): void {
+    this.carregarDashboard();
+  }
+
+  carregarDashboard(): void {
+    this.dashboardService.buscarDashboard().subscribe({
+      next: (resposta) => {
+      console.log('Resposta recebida:', resposta);
+
+        this.resumoCarteira.set(resposta.resumoCarteira);
+        this.recomendacoesPersonalizadas.set(resposta.recomendacoesPersonalizadas);
+        this.melhorSimulacao.set(resposta.melhorSimulacao);
+        this.graficoRendimentos.set(resposta.graficoRendimentos);
+
+        this.carregando.set(false);
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar dashboard:', erro);
+
+        this.erroCarregamento.set('Não foi possível carregar os dados do dashboard.');
+        this.carregando.set(false);
+      }
+    });
+  }
+
+  formatarMoeda(valor: number): string {
+    return valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
+  formatarPercentual(valor: number): string {
+    return `${valor.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}%`;
+  }
+
+  formatarRisco(risco: string): string {
+    if (!risco) return '';
+
+    return risco.charAt(0).toUpperCase() + risco.slice(1).toLowerCase();
+  }
+}
