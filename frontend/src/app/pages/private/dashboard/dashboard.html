@@ -54,20 +54,49 @@
       </div>
 
       <div class="chart-container">
-        @if (melhorSimulacao()) {
-            <div class="chart-empty-state">
-                <span>📉</span>
-                <h4>{{ melhorSimulacao()!.nome }}</h4>
-                <p>Melhor simulação: {{ melhorSimulacao()!.investimento }} com valor final de <strong>{{ formatarMoeda(melhorSimulacao()!.valorFinal) }}</strong>.</p>
-            </div>
+        @if (graficoRendimentos().length > 0) {
+          <canvas
+            baseChart
+            [data]="lineChartData()"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
         } @else {
-            <div class="chart-empty-state">
-                <span>📉</span>
-                <h4>Gráfico em desenvolvimento</h4>
-                <p>Este espaço será integrado posteriormente com uma biblioteca de gráficos.</p>
-            </div>
+          <div class="chart-empty-state">
+            <samp>>📉</samp>
+            <h4>Gráfico em desenvolvimento</h4>
+            <p>Os dados do gráfico serão exibidos quando houver simulações disponíveis.</p>
+          </div>
         }
       </div>
+
+      @if (melhorSimulacao(); as simulacao) {
+        <div class="best-simulation-card">
+          <div class="best-simulation-main">
+            <span class="best-label">Melhor simulação</span>
+            <h4>{{ simulacao.nome }}</h4>
+            <p>{{ simulacao.investimento }}</p>
+          </div>
+
+           <div class="best-simulation-values">
+            <div>
+              <span>Valor final</span>
+              <strong>{{ formatarMoeda(simulacao.valorFinal) }}</strong>
+            </div>
+
+            <div>
+              <span>Total investido</span>
+              <strong>{{ formatarMoeda(simulacao.totalInvestido) }}</strong>
+            </div>
+
+            <div>
+              <span>Rendimento</span>
+              <strong>{{ formatarMoeda(simulacao.totalRendimento) }}</strong>
+            </div>
+            
+           </div>
+        </div>
+      }
     </div>
 
     <div class="side-panel">

@@ -1,4 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 import{
   DashboardService,
   GraficoRendimento,
@@ -9,7 +11,7 @@ import{
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [BaseChartDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -43,7 +45,10 @@ export class Dashboard implements OnInit{
         this.resumoCarteira.set(resposta.resumoCarteira);
         this.recomendacoesPersonalizadas.set(resposta.recomendacoesPersonalizadas);
         this.melhorSimulacao.set(resposta.melhorSimulacao);
+
         this.graficoRendimentos.set(resposta.graficoRendimentos);
+
+        this.atualizarGrafico(resposta.graficoRendimentos);
 
         this.carregando.set(false);
       },
@@ -74,5 +79,73 @@ export class Dashboard implements OnInit{
     if (!risco) return '';
 
     return risco.charAt(0).toUpperCase() + risco.slice(1).toLowerCase();
+  }
+
+  lineChartType: 'line' = 'line';
+
+  lineChartData = signal<ChartConfiguration<'line'>['data']>({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Valor invstido',
+        tension: 0.35,
+        fill: false
+      },
+      {
+        data: [],
+        label: 'Valor projetado',
+        tension: 0.35,
+        fill: false
+      }
+    ]
+  });
+
+  lineChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context)=>{
+            const valor = Number(context.raw);
+
+            return `${context.dataset.label}: ${this.formatarMoeda(valor)}`;
+          }
+        }
+      }
+    },
+
+    scales: {
+      y: {
+        ticks: {
+          callback: (value)=> this.formatarMoeda(Number(value))
+        }
+      }
+    }
+  };
+
+  atualizarGrafico(dados: GraficoRendimento[]): void{
+    this.lineChartData.set({
+      labels: dados.map((item)=> `Mês ${item.mes}`),
+      datasets: [
+        {
+          data: dados.map((item) => item.valorInvestido),
+          label: 'Valor investido',
+          tension: 0.35,
+          fill: false
+        },
+        {
+          data: dados.map((item) => item.valorProjetado),
+          label: 'Valor projetado',
+          tension: 0.35,
+          fill: false
+        }
+      ]
+    });
   }
 }
