@@ -1,1 +1,50 @@
-<p>private-layout works!</p>
+<div class="private-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a routerLink="/app" class="sidebar-logo">
+        <mat-icon class="logo-icon">monetization_on</mat-icon>
+      </a>
+
+      <nav class="sidebar-nav">
+        @for (item of navItems; track item.route) {
+          <a
+            class="nav-link"
+            [routerLink]="item.route"
+            routerLinkActive="nav-link--active"
+            [matTooltip]="item.label"
+            matTooltipPosition="right"
+          >
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button
+        class="nav-link nav-link--logout"
+        (click)="logout()"
+        matTooltip="Sair"
+        matTooltipPosition="right"
+      >
+        <mat-icon>logout</mat-icon>
+        <span class="nav-label">Log out</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-actions">
+        <div class="avatar-placeholder"></div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

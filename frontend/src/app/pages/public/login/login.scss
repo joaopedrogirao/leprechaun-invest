@@ -5,6 +5,9 @@
 
 .lado-imagem {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   background-color: #ffffff;
 }
@@ -58,6 +61,13 @@ form {
   margin-top: 0.5rem;
 }
 
+.erro-login {
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-small);
+  text-align: center;
+  margin: 0;
+}
+
 .cadastro {
   margin-top: 1.5rem;
   font: var(--mat-sys-body-medium);
@@ -71,5 +81,21 @@ form {
 }
 
 .cadastro a:hover {
+  text-decoration: underline;
+}
+
+.esqueceu {
+  margin-top: auto;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.esqueceu a {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.esqueceu a:hover {
   text-decoration: underline;
 }

@@ -1,1 +1,136 @@
-<p>settings works!</p>
+<div class="settings-page">
+
+  <div class="settings-header">
+    <h1 class="settings-title">Configurações da Conta</h1>
+
+    <div class="settings-actions">
+      <button
+        mat-stroked-button
+        class="btn-questionario"
+        (click)="refazerQuestionario()"
+      >
+        <mat-icon>quiz</mat-icon>
+        Refazer Questionário
+      </button>
+
+      <button
+        mat-flat-button
+        class="btn-confirmar"
+        (click)="confirmarAlteracoes()"
+      >
+        <mat-icon>check</mat-icon>
+        Confirmar Alterações
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group
+    class="settings-tabs"
+    [(selectedIndex)]="activeTabIndex"
+    animationDuration="300ms"
+  >
+
+    <mat-tab label="Dados Pessoais">
+      <div class="tab-content">
+        <form [formGroup]="dadosForm" class="settings-form">
+
+          <div class="form-field-group">
+            <label class="field-label">Nome Completo</label>
+            <mat-form-field appearance="outline" class="campo">
+              <input
+                matInput
+                formControlName="nome"
+                placeholder="Digite seu nome completo"
+              />
+              @if (dadosForm.get('nome')?.hasError('required') && dadosForm.get('nome')?.touched) {
+                <mat-error>O nome não pode ser vazio</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-field-group">
+            <label class="field-label">E-mail</label>
+            <mat-form-field appearance="outline" class="campo">
+              <mat-icon matPrefix class="field-prefix-icon">email</mat-icon>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                placeholder="Digite seu e-mail"
+              />
+              @if (dadosForm.get('email')?.hasError('required') && dadosForm.get('email')?.touched) {
+                <mat-error>O e-mail não pode ser vazio</mat-error>
+              }
+              @if (dadosForm.get('email')?.hasError('email') && dadosForm.get('email')?.touched) {
+                <mat-error>E-mail inválido</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+        </form>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Segurança">
+      <div class="tab-content">
+        <form [formGroup]="senhaForm" class="settings-form">
+
+          <div class="form-field-group">
+            <label class="field-label">Nova Senha</label>
+            <mat-form-field appearance="outline" class="campo">
+              <input
+                matInput
+                [type]="novaSenhaVisivel ? 'text' : 'password'"
+                formControlName="novaSenha"
+                placeholder="Digite sua nova senha"
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="toggleNovaSenha()"
+              >
+                <mat-icon>{{ novaSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (senhaForm.get('novaSenha')?.hasError('required') && senhaForm.get('novaSenha')?.touched) {
+                <mat-error>A senha é obrigatória</mat-error>
+              }
+              @if (senhaForm.get('novaSenha')?.hasError('minlength') && senhaForm.get('novaSenha')?.touched) {
+                <mat-error>A senha deve ter pelo menos 6 caracteres</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-field-group">
+            <label class="field-label">Confirmar Senha</label>
+            <mat-form-field appearance="outline" class="campo">
+              <input
+                matInput
+                [type]="confirmarSenhaVisivel ? 'text' : 'password'"
+                formControlName="confirmarSenha"
+                placeholder="Digite sua senha novamente"
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="toggleConfirmarSenha()"
+              >
+                <mat-icon>{{ confirmarSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (senhaForm.get('confirmarSenha')?.hasError('required') && senhaForm.get('confirmarSenha')?.touched) {
+                <mat-error>A confirmação é obrigatória</mat-error>
+              }
+              @if (senhaForm.hasError('senhasNaoConferem') && senhaForm.get('confirmarSenha')?.touched) {
+                <mat-error>As senhas não coincidem</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+        </form>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

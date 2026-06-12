@@ -1,1 +1,71 @@
-<p>financial-education works!</p>
+<div class="education-page">
+
+  <h1 class="page-title">Educação Financeira</h1>
+
+  <section class="section-card">
+    <h2 class="section-title">
+      <mat-icon class="section-icon">show_chart</mat-icon>
+      Tipos de investimento
+    </h2>
+
+    <mat-accordion class="topic-accordion" multi>
+      @for (item of tiposInvestimento; track item.titulo) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="panel-icon">{{ item.icone }}</mat-icon>
+              {{ item.titulo }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p class="panel-resumo">{{ item.resumo }}</p>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </section>
+
+  <section class="section-card">
+    <h2 class="section-title">
+      <mat-icon class="section-icon">lightbulb</mat-icon>
+      Conceitos fundamentais
+    </h2>
+
+    <mat-accordion class="topic-accordion" multi>
+      @for (item of conceitosFundamentais; track item.titulo) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="panel-icon">{{ item.icone }}</mat-icon>
+              {{ item.titulo }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p class="panel-resumo">{{ item.resumo }}</p>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </section>
+
+
+  <section class="section-card">
+    <h2 class="section-title">
+      <mat-icon class="section-icon">menu_book</mat-icon>
+      Glossário
+    </h2>
+
+    <div class="glossario-list">
+      @for (item of glossario; track item.termo) {
+        <div class="glossario-item">
+          <div class="glossario-header">
+            <span class="glossario-termo">{{ item.termo }}</span>
+            <mat-chip-set>
+              <mat-chip [class]="item.categoria === 'Renda Fixa' ? 'chip-fixa' : 'chip-variavel'">
+                {{ item.categoria }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          <p class="glossario-descricao">{{ item.descricao }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+</div>

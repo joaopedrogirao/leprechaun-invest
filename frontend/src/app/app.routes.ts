@@ -12,6 +12,7 @@ export const routes: Routes = [
       { path: '', loadComponent: () => import('./pages/public/home/home').then(m => m.Home) },
       { path: 'login', canActivate: [noAuthGuard], loadComponent: () => import('./pages/public/login/login').then(m => m.Login) },
       { path: 'cadastro', canActivate: [noAuthGuard],  loadComponent: () => import('./pages/public/register/register').then(m => m.Register) },
+      { path: 'esqueci-senha', canActivate: [noAuthGuard], loadComponent: () => import('./pages/public/forgot-password/forgot-password').then(m => m.ForgotPassword)},
     ]
   },
   {
@@ -19,6 +20,7 @@ export const routes: Routes = [
     component: PrivateLayout,
     canActivate: [authGuard],
     children: [
+      { path: 'dashboard', loadComponent: () => import ('./pages/private/dashboard/dashboard').then(m => m.Dashboard )},
       { path: 'simulacoes', loadComponent: () => import('./pages/private/simulations/simulations').then(m => m.Simulations) },
       { path: 'recomendacoes', loadComponent: () => import('./pages/private/recommendations/recommendations').then(m => m.Recommendations) },
       { path: 'perfil', loadComponent: () => import('./pages/private/investor-profile/investor-profile').then(m => m.InvestorProfile) },
