@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,6 +24,9 @@ public class UsuarioService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -75,10 +80,7 @@ public class UsuarioService implements UserDetailsService {
 
         usuario.criarTokenRecuperacao(token, expiracao);
 
-        System.out.println("========== RECUPERAÇÃO DE SENHA ==========");
-        System.out.println("E-mail destino: " + usuario.getEmail());
-        System.out.println("Token gerado: " + token);
-        System.out.println("==========================================");
+        enviarEmailRecuperacao(usuario.getEmail(), token);
     }
 
     @Transactional
@@ -99,5 +101,23 @@ public class UsuarioService implements UserDetailsService {
 
         return usuarioRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
+    }
+
+    private void enviarEmailRecuperacao(String emailDestino, String token) {
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        
+        mensagem.setFrom("nao-responda@leprechauninvest.com");
+        mensagem.setTo(emailDestino);
+        mensagem.setSubject("Leprechaun Invest - Recuperação de Senha");
+        
+        String corpoEmail = "Olá!\n\n" +
+                "Você solicitou a recuperação de senha para a sua conta no Leprechaun Invest.\n" +
+                "Use o token abaixo para redefinir sua senha (válido por 30 minutos):\n\n" +
+                token + "\n\n" +
+                "Se você não solicitou essa alteração, ignore este e-mail.";
+                
+        mensagem.setText(corpoEmail);
+
+        mailSender.send(mensagem);
     }
 }
