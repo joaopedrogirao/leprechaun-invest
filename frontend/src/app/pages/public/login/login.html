@@ -19,10 +19,10 @@
             formControlName="email"
             placeholder="seuemail@example.com"
           />
-          @if (form.get('email')?.hasError('required')) {
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
             <mat-error>Email obrigatório</mat-error>
           }
-          @if (form.get('email')?.hasError('email')) {
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
             <mat-error>Email inválido</mat-error>
           }
         </mat-form-field>
@@ -43,24 +43,32 @@
           >
             <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          @if (form.get('senha')?.hasError('required')) {
+          @if (form.get('senha')?.hasError('required') && form.get('senha')?.touched) {
             <mat-error>Senha obrigatória</mat-error>
           }
         </mat-form-field>
+
+        @if (erroMensagem) {
+          <p class="erro-login">{{ erroMensagem }}</p>
+        }
 
         <button
           mat-flat-button
           type="submit"
           class="btn-entrar"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || carregando"
         >
-          Entrar
+          {{ carregando ? 'Entrando...' : 'Entrar' }}
         </button>
 
       </form>
 
       <p class="cadastro">
         Não tem conta? <a routerLink="/cadastro">Cadastre-se</a>
+      </p>
+
+      <p class="esqueceu">
+        <a routerLink="/esqueci-senha">Esqueci minha senha</a>
       </p>
 
     </div>

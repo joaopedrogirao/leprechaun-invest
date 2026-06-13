@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -91,5 +92,12 @@ public class UsuarioService implements UserDetailsService {
 
         String senhaCriptografada = passwordEncoder.encode(novaSenha);
         usuario.atualizarSenha(senhaCriptografada);
+    }
+}
+    public Usuario buscarUsuarioLogado(Authentication authentication) {
+        String email = authentication.getName();
+
+        return usuarioRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
     }
 }

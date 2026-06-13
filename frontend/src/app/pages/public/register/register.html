@@ -1,113 +1,67 @@
 <div class="pagina">
-
   <div class="lado-imagem">
-    <img src="logo.png" alt="Investimentos" />
+    <img src="logo.png" alt="Leprechaun.invest" />
   </div>
 
   <div class="lado-form">
     <div class="card-form">
-
       <h1>Crie sua conta</h1>
 
       <form [formGroup]="form" (ngSubmit)="cadastrar()">
 
         <mat-form-field appearance="outline" class="campo">
           <mat-label>Nome completo</mat-label>
-          <input
-            matInput
-            type="text"
-            formControlName="nome"
-            placeholder="Seu nome completo"
-          />
-          @if (form.get('nome')?.hasError('required')) {
+          <input matInput type="text" formControlName="nome" placeholder="Seu nome completo" />
+          @if (form.get('nome')?.hasError('required') && form.get('nome')?.touched) {
             <mat-error>Nome obrigatório</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="campo">
           <mat-label>Email</mat-label>
-          <input
-            matInput
-            type="email"
-            formControlName="email"
-            placeholder="seuemail@example.com"
-          />
-          @if (form.get('email')?.hasError('required')) {
+          <input matInput type="email" formControlName="email" placeholder="seuemail@example.com" />
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
             <mat-error>Email obrigatório</mat-error>
           }
-          @if (form.get('email')?.hasError('email')) {
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
             <mat-error>Email inválido</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="campo">
-          <mat-label>Telefone</mat-label>
-          <input
-            matInput
-            type="tel"
-            formControlName="telefone"
-            placeholder="(11) 99999-9999"
-          />
-          @if (form.get('telefone')?.hasError('required')) {
-            <mat-error>Telefone obrigatório</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="campo">
           <mat-label>Senha</mat-label>
-          <input
-            matInput
-            [type]="senhaVisivel ? 'text' : 'password'"
-            formControlName="senha"
-            placeholder="Digite sua senha"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="toggleSenha()"
-          >
+          <input matInput [type]="senhaVisivel ? 'text' : 'password'" formControlName="senha" placeholder="Digite sua senha" />
+          <button mat-icon-button matSuffix type="button" (click)="toggleSenha()">
             <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          @if (form.get('senha')?.hasError('required')) {
+          @if (form.get('senha')?.hasError('required') && form.get('senha')?.touched) {
             <mat-error>Senha obrigatória</mat-error>
           }
-          @if (form.get('senha')?.hasError('minlength')) {
+          @if (form.get('senha')?.hasError('minlength') && form.get('senha')?.touched) {
             <mat-error>A senha deve ter pelo menos 6 caracteres</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="campo">
           <mat-label>Confirmar senha</mat-label>
-          <input
-            matInput
-            [type]="confirmarSenhaVisivel ? 'text' : 'password'"
-            formControlName="confirmarSenha"
-            placeholder="Confirme sua senha"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="toggleConfirmarSenha()"
-          >
+          <input matInput [type]="confirmarSenhaVisivel ? 'text' : 'password'" formControlName="confirmarSenha" placeholder="Confirme sua senha" />
+          <button mat-icon-button matSuffix type="button" (click)="toggleConfirmarSenha()">
             <mat-icon>{{ confirmarSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          @if (form.get('confirmarSenha')?.hasError('required')) {
+          @if (form.get('confirmarSenha')?.hasError('required') && form.get('confirmarSenha')?.touched) {
             <mat-error>Confirmação obrigatória</mat-error>
           }
-          @if (form.get('confirmarSenha')?.hasError('senhaNaoConfere')) {
+          @if (form.get('confirmarSenha')?.hasError('senhaNaoConfere') && form.get('confirmarSenha')?.touched) {
             <mat-error>As senhas não coincidem</mat-error>
           }
         </mat-form-field>
 
-        <button
-          mat-flat-button
-          type="submit"
-          class="btn-entrar"
-          [disabled]="form.invalid"
-        >
-          Cadastrar
+        @if (erroMensagem) {
+          <p class="erro-geral">{{ erroMensagem }}</p>
+        }
+
+        <button mat-flat-button type="submit" class="btn-entrar" [disabled]="form.invalid || carregando">
+          {{ carregando ? 'Cadastrando...' : 'Cadastrar' }}
         </button>
 
       </form>
@@ -118,5 +72,4 @@
 
     </div>
   </div>
-
 </div>
