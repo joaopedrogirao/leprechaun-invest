@@ -93,7 +93,7 @@ public class UsuarioService implements UserDetailsService {
         String senhaCriptografada = passwordEncoder.encode(novaSenha);
         usuario.atualizarSenha(senhaCriptografada);
     }
-}
+    
     public Usuario buscarUsuarioLogado(Authentication authentication) {
         String email = authentication.getName();
 
