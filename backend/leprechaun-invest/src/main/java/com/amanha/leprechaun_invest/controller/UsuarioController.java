@@ -6,23 +6,21 @@ import com.amanha.leprechaun_invest.domain.usuario.EmailRecuperacaoDTO;
 import com.amanha.leprechaun_invest.domain.usuario.NovaSenhaDTO;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioDTO;
-import com.amanha.leprechaun_invest.domain.usuario.UsuarioRepository;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.security.Principal;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuarios")
 @RequiredArgsConstructor
-public class UsuarioController {
+public class UsuarioController
+{
     private final UsuarioService usuarioService;
-    private final UsuarioRepository usuarioRepository;
 
     @PostMapping
     public ResponseEntity<?> cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
@@ -31,21 +29,20 @@ public class UsuarioController {
     }
 
     @PostMapping("/me/perfil-investidor")
-    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Principal principal, @RequestBody @Valid QuizPerfilUsuarioDTO dados) 
+    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Authentication authentication, @RequestBody QuizPerfilUsuarioDTO dados)
     {
-        Usuario usuarioLogado = usuarioRepository.findByEmailIgnoreCase(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
-
+        Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
+        
         UsuarioDTO usuarioAtualizado = usuarioService.definirPerfilInvestidor(usuarioLogado.getId(), dados);
         
         return ResponseEntity.ok(usuarioAtualizado);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UsuarioDTO> buscarPerfilLogado(Principal principal) {
-        Usuario usuarioLogado = usuarioRepository.findByEmailIgnoreCase(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
-                
+    public ResponseEntity<UsuarioDTO> buscarPerfilLogado(Authentication authentication)
+    {
+        Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
+        
         return ResponseEntity.ok(new UsuarioDTO(usuarioLogado));
     }
 
