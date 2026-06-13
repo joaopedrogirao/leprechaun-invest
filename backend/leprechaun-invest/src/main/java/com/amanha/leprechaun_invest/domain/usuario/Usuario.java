@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,6 +25,8 @@ public class Usuario implements UserDetails {
     private String email;
     private String nome;
     private String senha;
+    private String tokenRecuperacao;
+    private LocalDateTime expiracaoToken;
 
     public Usuario(CadastroDTO dados, String senhaCripitografada) {
         this.nome = dados.nome();
@@ -51,5 +54,16 @@ public class Usuario implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    public void criarTokenRecuperacao(String token, LocalDateTime expiracao) {
+        this.tokenRecuperacao = token;
+        this.expiracaoToken = expiracao;
+    }
+
+    public void atualizarSenha(String novaSenhaCriptografada) {
+        this.senha = novaSenhaCriptografada;
+        this.tokenRecuperacao = null;
+        this.expiracaoToken = null;
     }
 }
