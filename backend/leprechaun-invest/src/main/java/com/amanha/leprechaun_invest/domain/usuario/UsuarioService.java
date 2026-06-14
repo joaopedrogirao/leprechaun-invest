@@ -2,7 +2,13 @@ package com.amanha.leprechaun_invest.domain.usuario;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +24,9 @@ public class UsuarioService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -61,11 +70,54 @@ public class UsuarioService implements UserDetailsService {
         return new UsuarioDTO(usuario);
     }
 
+    @Transactional
+    public void solicitarRecuperacaoSenha(String email) {
+        Usuario usuario = usuarioRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiracao = LocalDateTime.now().plusMinutes(30);
+
+        usuario.criarTokenRecuperacao(token, expiracao);
+
+        enviarEmailRecuperacao(usuario.getEmail(), token);
+    }
+
+    @Transactional
+    public void redefinirSenha(String token, String novaSenha) {
+        Usuario usuario = usuarioRepository.findByTokenRecuperacao(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido ou não encontrado!"));
+
+        if (usuario.getExpiracaoToken().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("O token expirou. Solicite a recuperação novamente.");
+        }
+
+        String senhaCriptografada = passwordEncoder.encode(novaSenha);
+        usuario.atualizarSenha(senhaCriptografada);
+    }
+    
     public Usuario buscarUsuarioLogado(Authentication authentication) {
         String email = authentication.getName();
 
         return usuarioRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
+    }
+
+    private void enviarEmailRecuperacao(String emailDestino, String token) {
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        
+        mensagem.setFrom("nao-responda@leprechauninvest.com");
+        mensagem.setTo(emailDestino);
+        mensagem.setSubject("Leprechaun Invest - Recuperação de Senha");
+        
+        String corpoEmail = "Olá!\n\n" +
+                "Você solicitou a recuperação de senha para a sua conta no Leprechaun Invest.\n" +
+                "Use o token abaixo para redefinir sua senha (válido por 30 minutos):\n\n" +
+                token + "\n\n" +
+                "Se você não solicitou essa alteração, ignore este e-mail.";
+                
+        mensagem.setText(corpoEmail);
+
+        mailSender.send(mensagem);
     }
 }
