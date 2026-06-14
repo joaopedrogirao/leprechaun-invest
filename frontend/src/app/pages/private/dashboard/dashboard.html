@@ -1,1 +1,172 @@
-<p>dashboard works!</p>
+<section class="dashboard-page">
+
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="dashboard-subtitle">
+        Acompanhe suas simulações, rendimento projetado e recomendações de investimento.
+      </p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+
+    <div class="summary-card">
+        <span class="card-icon">💰</span>
+        <p class="card-label">Total investido</p>
+        <h2>{{ formatarMoeda(resumoCarteira().totalInvestido) }}</h2>
+        <span class="card-info">Soma dos valores aplicados nas simulações salvas.</span>
+    </div>
+
+    <div class="summary-card">
+        <span class="card-icon">📈</span>
+        <p class="card-label">Lucro acumulado</p>
+        <h2>{{ formatarMoeda(resumoCarteira().lucroAcumulado) }}</h2>
+        <span class="card-info">Rendimento obtido nas projeções realizadas.</span>
+    </div>
+
+    <div class="summary-card">
+        <span class="card-icon">📊</span>
+        <p class="card-label">Rentabilidade</p>
+        <h2>{{ formatarPercentual(resumoCarteira().rentabilidadePercentual) }}</h2>
+        <span class="card-info">Percentual de ganho em relação ao valor investido.</span>
+    </div>
+
+    <div class="summary-card">
+        <span class="card-icon">🍀</span>
+        <p class="card-label">Patrimônio projetado</p>
+        <h2>{{ formatarMoeda(resumoCarteira().patrimonioProjetado) }}</h2>
+        <span class="card-info">Valor final estimado após o rendimento acumulado.</span>
+    </div>
+
+  </div>
+
+  <div class="dashboard-content">
+
+    <div class="main-panel">
+      <div class="panel-header">
+        <div>
+          <h3>Evolução patrimonial</h3>
+          <p>
+            Área reservada para o gráfico de crescimento do melhor investimento.
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        @if (graficoRendimentos().length > 0) {
+          <canvas
+            baseChart
+            [data]="lineChartData()"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        } @else {
+          <div class="chart-empty-state">
+            <samp>>📉</samp>
+            <h4>Gráfico em desenvolvimento</h4>
+            <p>Os dados do gráfico serão exibidos quando houver simulações disponíveis.</p>
+          </div>
+        }
+      </div>
+
+      @if (melhorSimulacao(); as simulacao) {
+        <div class="best-simulation-card">
+          <div class="best-simulation-main">
+            <span class="best-label">Melhor simulação</span>
+            <h4>{{ simulacao.nome }}</h4>
+            <p>{{ simulacao.investimento }}</p>
+          </div>
+
+           <div class="best-simulation-values">
+            <div>
+              <span>Valor final</span>
+              <strong>{{ formatarMoeda(simulacao.valorFinal) }}</strong>
+            </div>
+
+            <div>
+              <span>Total investido</span>
+              <strong>{{ formatarMoeda(simulacao.totalInvestido) }}</strong>
+            </div>
+
+            <div>
+              <span>Rendimento</span>
+              <strong>{{ formatarMoeda(simulacao.totalRendimento) }}</strong>
+            </div>
+            
+           </div>
+        </div>
+      }
+    </div>
+
+    <div class="side-panel">
+      <h3>Ações rápidas</h3>
+
+      <a href="/app/simulacoes" class="quick-action">
+        <div>
+          <strong>Nova simulação</strong>
+          <span>Projete um novo cenário de investimento.</span>
+        </div>
+        <span class="quick-arrow">→</span>
+      </a>
+
+      <a href="/app/comparar-cenarios" class="quick-action">
+        <div>
+          <strong>Comparar cenários</strong>
+          <span>Compare diferentes possibilidades de aplicação.</span>
+        </div>
+        <span class="quick-arrow">→</span>
+      </a>
+
+      <a href="/app/recomendacoes" class="quick-action">
+        <div>
+          <strong>Recomendações</strong>
+          <span>Veja opções compatíveis com seu perfil.</span>
+        </div>
+        <span class="quick-arrow">→</span>
+      </a>
+
+      <a href="/app/perfil" class="quick-action">
+        <div>
+          <strong>Perfil do investidor</strong>
+          <span>Consulte ou atualize seu perfil atual.</span>
+        </div>
+        <span class="quick-arrow">→</span>
+      </a>
+    </div>
+
+  </div>
+
+  <div class="recommendations-panel">
+        <div class="panel-header">
+            <div>
+                <h3>Recomendações personalizadas</h3>
+                <p>Investimentos sugeridos de acordo com o perfil do usuário.</p>
+            </div>
+        </div>
+
+        <div class="recommendations-grid">
+            @for (recomendacao of recomendacoesPersonalizadas(); track recomendacao.nome) {
+                <div class="recommendation-card">
+                    <span class="risk"
+                     [class.low]="recomendacao.risco === 'BAIXO'"
+                     [class.medium]="recomendacao.risco === 'MEDIO' || recomendacao.risco === 'MÉDIO'"
+                     [class.high]="recomendacao.risco === 'ALTO'">
+                        {{ formatarRisco(recomendacao.risco) }} risco
+                    </span>
+
+                    <h4>{{ recomendacao.nome }}</h4>
+
+                    <div class="recommendation-info">
+                        <span>Rentabilidade</span>
+                        <strong>{{ recomendacao.rentabilidade }}</strong>
+                    </div>
+
+                    <p>Investimento recomendado de acordo com seu perfil e histórico de simulações.</p>
+
+                </div>
+            }
+        </div>
+  </div>
+
+</section>
