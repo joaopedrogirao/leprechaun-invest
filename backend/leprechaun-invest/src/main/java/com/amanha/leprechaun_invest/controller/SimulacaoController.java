@@ -65,5 +65,11 @@ public class SimulacaoController {
 
         return simulacaoService.buscarDetalhes(id, usuario);
     }
+
+    @GetMapping("/resumo")
+    public ResponseEntity<ResumoSimulacoesDTO> buscarResumoSimulacoes(Authentication authentication) {
+        Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
+        return ResponseEntity.ok(simulacaoService.buscarResumo(usuario));
+    }
 }
 
