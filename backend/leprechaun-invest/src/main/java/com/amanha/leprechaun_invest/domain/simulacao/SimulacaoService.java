@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SimulacaoService {
@@ -391,6 +392,34 @@ public class SimulacaoService {
                 .orElseThrow(() -> new RuntimeException("Simulação não encontrada"));
 
         simulacaoRepository.delete(simulacao);
+    }
+
+    public ResumoSimulacoesDTO buscarResumo(Usuario usuario) {
+        List<Simulacao> simulacoes = simulacaoRepository
+                .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId());
+
+        if (simulacoes.isEmpty()) {
+            return new ResumoSimulacoesDTO(0L, BigDecimal.ZERO, BigDecimal.ZERO, null);
+        }
+
+        Long totalSimulacoesSalvas = (long) simulacoes.size();
+
+        BigDecimal melhorProjecao = simulacoes.stream()
+                .map(Simulacao::getValorFinal)
+                .max(BigDecimal::compareTo)
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal rentabilidadeMediaTotal = simulacoes.stream()
+                .map(Simulacao::getTaxaAnualUsada)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(totalSimulacoesSalvas), 2, RoundingMode.HALF_UP);
+
+        LocalDateTime ultimaSimulacao = simulacoes.stream()
+                .map(Simulacao::getDataCriacao)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        return new ResumoSimulacoesDTO(totalSimulacoesSalvas, melhorProjecao, rentabilidadeMediaTotal, ultimaSimulacao);
     }
 
 }
