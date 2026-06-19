@@ -41,7 +41,7 @@ public class IndicadorFinanceiroService {
     private BigDecimal buscarTaxaBasePorCodigoApi(String codigoApi) {
         return switch (codigoApi) {
             case "SELIC" -> buscarUltimoValorSerie("432");
-            case "CDI" -> buscarUltimoValorSerie("12");
+            case "CDI" -> buscarCdiAnualizado();
             case "IPCA" -> buscarIpcaAnualizado();
             case "HGLG11" -> BigDecimal.valueOf(9.60);
             case "PETR4" -> BigDecimal.valueOf(14.00);
@@ -83,16 +83,46 @@ public class IndicadorFinanceiroService {
     private BigDecimal buscarIpcaAnualizado() {
         BigDecimal ipcaMensal = buscarUltimoValorSerie("433");
 
-        return ipcaMensal.multiply(BigDecimal.valueOf(12));
+        return converterTaxaMensalParaAnual(ipcaMensal);
+    }
+
+    private BigDecimal converterTaxaMensalParaAnual(BigDecimal taxaMensalPercentual) {
+        double taxaMensalDecimal = taxaMensalPercentual
+                .divide(BigDecimal.valueOf(100), 12, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        double taxaAnualDecimal = Math.pow(1 + taxaMensalDecimal, 12) - 1;
+
+        return BigDecimal.valueOf(taxaAnualDecimal)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(4, RoundingMode.HALF_UP);
     }
 
     private BigDecimal taxaFallback(String codigoSerie) {
         return switch (codigoSerie) {
             case "432" -> BigDecimal.valueOf(10.50);
             case "12" -> BigDecimal.valueOf(10.40);
-            case "433" -> BigDecimal.valueOf(4.50);
+            case "433" -> BigDecimal.valueOf(0.37);
             default -> BigDecimal.valueOf(10.00);
         };
+    }
+
+    private BigDecimal buscarCdiAnualizado() {
+        BigDecimal cdiDiario = buscarUltimoValorSerie("12");
+
+        return converterTaxaDiariaParaAnual(cdiDiario);
+    }
+
+    private BigDecimal converterTaxaDiariaParaAnual(BigDecimal taxaDiariaPercentual) {
+        double taxaDiariaDecimal = taxaDiariaPercentual
+                .divide(BigDecimal.valueOf(100), 12, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        double taxaAnualDecimal = Math.pow(1 + taxaDiariaDecimal, 252) - 1;
+
+        return BigDecimal.valueOf(taxaAnualDecimal)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(4, RoundingMode.HALF_UP);
     }
 
 }
