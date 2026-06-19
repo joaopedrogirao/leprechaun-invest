@@ -14,31 +14,80 @@
       <button class="btn btn-secondary" >
         + Comparar Cenário
       </button>
+
+      <button class="btn btn-secondary btn-filter" type="button" (click)="alternarOpcoesOrdenacao()">
+        Ordenar
+      </button>
+
     </div>
   </section>
+
+  @if (mostrarOpcoesOrdenacao()) {
+  <div class="sort-options-card">
+        <button type="button" (click)="ordenarPor('valorFinal', 'desc')">
+        Maior valor final
+        </button>
+
+        <button type="button" (click)="ordenarPor('valorFinal', 'asc')">
+        Menor valor final
+        </button>
+
+        <button type="button" (click)="ordenarPor('totalRendimento', 'desc')">
+        Maior rendimento
+        </button>
+
+        <button type="button" (click)="ordenarPor('totalRendimento', 'asc')">
+        Menor rendimento
+        </button>
+
+        <button type="button" (click)="ordenarPor('taxaAnualUsada', 'desc')">
+        Maior taxa anual
+        </button>
+
+        <button type="button" (click)="ordenarPor('taxaAnualUsada', 'asc')">
+        Menor taxa anual
+        </button>
+
+        <button type="button" (click)="ordenarPor('periodoMeses', 'desc')">
+        Maior prazo
+        </button>
+
+        <button type="button" (click)="ordenarPor('periodoMeses', 'asc')">
+        Menor prazo
+        </button>
+
+        <button type="button" (click)="ordenarPor('dataCriacao', 'desc')">
+        Mais recentes
+        </button>
+
+        <button type="button" (click)="ordenarPor('dataCriacao', 'asc')">
+        Mais antigas
+        </button>
+  </div>
+ }
 
   <section class="summary-grid">
     <div class="summary-card">
       <span class="summary-label">Simulações salvas</span>
-      <strong>{{ resumo?.totalSimulacoesSalvas || 0 }}</strong>
+      <strong>{{ resumo().totalSimulacoesSalvas}}</strong>
       <small>Total de projeções criadas</small>
     </div>
 
     <div class="summary-card">
       <span class="summary-label">Melhor projeção</span>
-      <strong>{{ formatarMoeda(resumo?.melhorProjecao || 0) }}</strong>
+      <strong>{{ formatarMoeda(resumo().melhorProjecao) }}</strong>
       <small>Maior valor final estimado</small>
     </div>
 
     <div class="summary-card">
       <span class="summary-label">Rentabilidade média</span>
-      <strong>{{ formatarPercentual(resumo?.rentabilidadeMediaTotal || 0) }} a.a</strong>
+      <strong>{{ formatarPercentual(resumo().rentabilidadeMediaTotal) }} a.a</strong>
       <small>Média das taxas usadas nas simulações</small>
     </div>
 
     <div class="summary-card">
       <span class="summary-label">Última simulação</span>
-      <strong>{{ formatarData(resumo?.ultimaSimulacao) }}</strong>
+      <strong>{{ formatarData(resumo().ultimaSimulacao) }}</strong>
       <small>Último cenário criado</small>
     </div>
   </section>
@@ -53,7 +102,7 @@
       </div>
     </div>
 
-    @if (simulacoes.length === 0) {
+    @if (simulacoes().length === 0) {
         <div class="empty-state">
             <h3>Nenhuma simulação salva ainda</h3>
             <p>Crie sua primeira simulação para visualizar projeções e acompanhar seus resultados.</p>
@@ -79,7 +128,7 @@
                 </thead>
 
                 <tbody>
-                    @for (simulacao of simulacoes; track simulacao.id) {
+                    @for (simulacao of simulacoesOrdenadas(); track simulacao.id) {
                         <tr>
                             <td>
                                  <div class="simulation-name">
@@ -132,9 +181,9 @@
     }
   </section>
 
-  @if (simulacoes.length > 0) {
+  @if (simulacoes().length > 0) {
     <section class="simulation-cards">
-        @for (simulacao of simulacoes.slice(0, 2); track simulacao.id) {
+        @for (simulacao of melhoresSimulacoes(); track simulacao.id) {
             <div class="simulation-card">
                 <div class="card-top">
                     <div>

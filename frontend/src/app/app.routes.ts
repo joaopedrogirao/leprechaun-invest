@@ -22,6 +22,8 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import ('./pages/private/dashboard/dashboard').then(m => m.Dashboard )},
       { path: 'simulacoes', loadComponent: () => import('./pages/private/simulations/simulations').then(m => m.Simulations) },
+      {path: 'simulacoes/nova', loadComponent: () => import('./pages/private/simulations/new-simulation/new-simulation').then(m => m.NewSimulation)},
+      {path: 'simulacoes/:id', loadComponent: () => import('./pages/private/simulations/simulation-details/simulation-details').then(m => m.SimulationDetails)},
       { path: 'recomendacoes', loadComponent: () => import('./pages/private/recommendations/recommendations').then(m => m.Recommendations) },
       { path: 'perfil', loadComponent: () => import('./pages/private/investor-profile/investor-profile').then(m => m.InvestorProfile) },
       { path: 'educacao', loadComponent: () => import('./pages/private/financial-education/financial-education').then(m => m.FinancialEducation) },

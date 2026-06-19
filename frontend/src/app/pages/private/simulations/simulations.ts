@@ -1,52 +1,102 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal,computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+
 
 import { Simulation } from '../../../core/services/simulation';
-import { ResumoSimulacoes,
-  SimulacaoListagem} from '../../../core/models/simulation.model';
+import { ResumoSimulacoes,SimulacaoListagem} from '../../../core/models/simulation.model';
+
+type CampoOrdenacao =
+  | 'dataCriacao'
+  | 'valorFinal'
+  | 'totalRendimento'
+  | 'taxaAnualUsada'
+  | 'periodoMeses'
+  | 'valorInicial'
+  | 'aporteMensal'
+  | 'nome'
+  | 'investimento';
+
+  type DirecaoOrdenacao = 'asc' | 'desc';
+
+  type OrdenacaoSimulacao = {
+  campo: CampoOrdenacao;
+  direcao: DirecaoOrdenacao;
+};
 
 @Component({
   selector: 'app-simulations',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './simulations.html',
   styleUrl: './simulations.scss',
 })
+
 export class Simulations implements OnInit {
 
-  resumo: ResumoSimulacoes | null = null;
-  simulacoes: SimulacaoListagem[] = [];
+  private simulation = inject(Simulation);
+  private router = inject(Router);
 
-  carregando = false;
-  erro = '';
+  carregandoResumo = signal(true);
+  carregandoSimulacoes = signal(true);
+  erroCarregamento = signal('');
+  mostrarOpcoesOrdenacao = signal(false);
 
-  constructor(
-    private Simulation: Simulation,
-    private router: Router
-  ) {}
+  ordenacao = signal<OrdenacaoSimulacao>({
+    campo: 'dataCriacao',
+    direcao: 'desc',
+  });
+
+
+  resumo = signal<ResumoSimulacoes>({
+    totalSimulacoesSalvas: 0,
+    melhorProjecao: 0,
+    rentabilidadeMediaTotal: 0,
+    ultimaSimulacao: null
+  });
+
+  simulacoes = signal<SimulacaoListagem[]>([]);
+
+  melhoresSimulacoes = computed(() => {
+    return [...this.simulacoes()]
+      .sort((a, b) => b.valorFinal - a.valorFinal)
+      .slice(0, 2);
+  });
 
   ngOnInit(): void {
-    this.carregarPagina();
+    this.carregarResumo();
+    this.carregarSimulacoes();
   }
 
-  carregarPagina(): void {
-    this.carregando = true;
-    this.erro = '';
+  carregarResumo(): void {
+    this.carregandoResumo.set(true);
 
-    forkJoin({
-      resumo: this.Simulation.buscarResumo(),
-      simulacoes: this.Simulation.listarSimulacoes()
-    }).subscribe({
-      next: ({ resumo, simulacoes }) => {
-        this.resumo = resumo;
-        this.simulacoes = simulacoes;
-        this.carregando = false;
+    this.simulation.buscarResumo().subscribe({
+      next: (resposta) => {
+        this.resumo.set(resposta);
+        this.carregandoResumo.set(false);
       },
-      error: () => {
-        this.erro = 'Não foi possível carregar suas simulações.';
-        this.carregando = false;
+      error: (erro) => {
+        console.error('Erro ao carregar resumo das simulações:', erro);
+
+        this.erroCarregamento.set('Não foi possível carregar o resumo das simulações.');
+        this.carregandoResumo.set(false);
+      }
+    });
+  }
+
+  carregarSimulacoes(): void {
+    this.carregandoSimulacoes.set(true);
+
+    this.simulation.listarSimulacoes().subscribe({
+      next: (resposta) => {
+        this.simulacoes.set(resposta);
+        this.carregandoSimulacoes.set(false);
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar simulações:', erro);
+
+        this.erroCarregamento.set('Não foi possível carregar suas simulações.');
+        this.carregandoSimulacoes.set(false);
       }
     });
   }
@@ -66,49 +116,72 @@ export class Simulations implements OnInit {
       return;
     }
 
-    this.Simulation.deletarSimulacao(id).subscribe({
+    this.simulation.deletarSimulacao(id).subscribe({
       next: () => {
-        this.carregarPagina();
+        this.carregarResumo();
+        this.carregarSimulacoes();
       },
-      error: () => {
-        this.erro = 'Não foi possível excluir a simulação.';
+      error: (erro) => {
+        console.error('Erro ao excluir simulação:', erro);
+        this.erroCarregamento.set('Não foi possível excluir a simulação.');
       }
     });
   }
 
-  formatarMoeda(valor: number | null | undefined): string {
-  if (valor === null || valor === undefined) {
-    return 'R$ 0,00';
+  formatarMoeda(valor: number): string {
+    return valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
   }
 
-  return valor.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'});
+  formatarPercentual(valor: number): string {
+    return `${valor.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}%`;
   }
 
-  formatarPercentual(valor: number | null | undefined): string {
-  if (valor === null || valor === undefined) {
-    return '0,00%';
-  }
+  formatarData(data: string | null): string {
+    if (!data) {
+      return '-';
+    }
 
-  return `${valor.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2})}%`;
-  }
-
-  formatarRentabilidade(valor: number | null | undefined): string {
-  if (valor === null || valor === undefined) {
-    return '-';
-  }
-
-    return `${this.formatarPercentual(valor)} a.a`;
-  }
-
-  formatarData(data: string | null | undefined): string {
-  if (!data) {
-    return '-';
-  }
     return new Date(data).toLocaleDateString('pt-BR');
   }
 
+  alternarOpcoesOrdenacao(): void {
+    this.mostrarOpcoesOrdenacao.update((valor) => !valor);
+  }
+
+  ordenarPor(campo: CampoOrdenacao, direcao: DirecaoOrdenacao): void {
+    this.ordenacao.set({ campo, direcao });
+    this.mostrarOpcoesOrdenacao.set(false);
+  }
+
+  simulacoesOrdenadas = computed(() => {
+    const ordenacao = this.ordenacao();
+    return [...this.simulacoes()].sort((a, b) => {
+      const valorA = a[ordenacao.campo];
+      const valorB = b[ordenacao.campo];
+
+      if (ordenacao.campo === 'nome' || ordenacao.campo === 'investimento') {
+        const comparacao = String(valorA).localeCompare(String(valorB), 'pt-BR');
+        return ordenacao.direcao === 'asc' ? comparacao : -comparacao;
+      }
+
+      if (ordenacao.campo === 'dataCriacao') {
+        const dataA = new Date(String(valorA)).getTime();
+        const dataB = new Date(String(valorB)).getTime();
+
+        return ordenacao.direcao === 'asc'? dataA - dataB: dataB - dataA;
+      }
+
+      const numeroA = Number(valorA);
+      const numeroB = Number(valorB);
+
+      return ordenacao.direcao === 'asc'? numeroA - numeroB: numeroB - numeroA;
+
+    });
+  });
 }

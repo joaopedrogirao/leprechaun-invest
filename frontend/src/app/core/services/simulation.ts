@@ -16,7 +16,7 @@ export class Simulation {
 
    constructor(private http: HttpClient) {}
 
-   buscarResumo(): Observable<ResumoSimulacoes> {
+  buscarResumo(): Observable<ResumoSimulacoes> {
     return this.http.get<ResumoSimulacoes>(
       `${this.apiUrl}/resumo`,
       { withCredentials: true }
