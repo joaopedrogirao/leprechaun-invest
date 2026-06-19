@@ -10,6 +10,7 @@ public record SimulacaoListagemDTO(
         BigDecimal valorInicial,
         BigDecimal aporteMensal,
         Integer periodoMeses,
+        BigDecimal taxaAnualUsada,
         BigDecimal valorFinal,
         BigDecimal totalRendimento,
         LocalDateTime dataCriacao

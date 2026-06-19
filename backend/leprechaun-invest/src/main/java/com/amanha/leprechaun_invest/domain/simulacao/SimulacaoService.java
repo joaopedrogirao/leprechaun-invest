@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SimulacaoService {
@@ -331,6 +330,7 @@ public class SimulacaoService {
                 simulacao.getValorInicial(),
                 simulacao.getAporteMensal(),
                 simulacao.getPeriodoMeses(),
+                simulacao.getTaxaAnualUsada(),
                 simulacao.getValorFinal(),
                 simulacao.getTotalRendimento(),
                 simulacao.getDataCriacao()
