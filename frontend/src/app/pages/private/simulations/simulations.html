@@ -1,1 +1,225 @@
-<p>simulations works!</p>
+<div class="simulacoes-page">
+
+  <section class="page-header">
+    <div>
+      <h1>Simulações</h1>
+      <p>Crie e visualize suas projeções de investimento</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-primary" type="button" (click)="novaSimulacao()">
+        + Nova Simulação
+      </button>
+
+      <button class="btn btn-secondary" >
+        + Comparar Cenário
+      </button>
+
+      <button class="btn btn-secondary btn-filter" type="button" (click)="alternarOpcoesOrdenacao()">
+        Ordenar
+      </button>
+
+    </div>
+  </section>
+
+  @if (mostrarOpcoesOrdenacao()) {
+  <div class="sort-options-card">
+        <button type="button" (click)="ordenarPor('valorFinal', 'desc')">
+        Maior valor final
+        </button>
+
+        <button type="button" (click)="ordenarPor('valorFinal', 'asc')">
+        Menor valor final
+        </button>
+
+        <button type="button" (click)="ordenarPor('totalRendimento', 'desc')">
+        Maior rendimento
+        </button>
+
+        <button type="button" (click)="ordenarPor('totalRendimento', 'asc')">
+        Menor rendimento
+        </button>
+
+        <button type="button" (click)="ordenarPor('taxaAnualUsada', 'desc')">
+        Maior taxa anual
+        </button>
+
+        <button type="button" (click)="ordenarPor('taxaAnualUsada', 'asc')">
+        Menor taxa anual
+        </button>
+
+        <button type="button" (click)="ordenarPor('periodoMeses', 'desc')">
+        Maior prazo
+        </button>
+
+        <button type="button" (click)="ordenarPor('periodoMeses', 'asc')">
+        Menor prazo
+        </button>
+
+        <button type="button" (click)="ordenarPor('dataCriacao', 'desc')">
+        Mais recentes
+        </button>
+
+        <button type="button" (click)="ordenarPor('dataCriacao', 'asc')">
+        Mais antigas
+        </button>
+  </div>
+ }
+
+  <section class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-label">Simulações salvas</span>
+      <strong>{{ resumo().totalSimulacoesSalvas}}</strong>
+      <small>Total de projeções criadas</small>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Melhor projeção</span>
+      <strong>{{ formatarMoeda(resumo().melhorProjecao) }}</strong>
+      <small>Maior valor final estimado</small>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Rentabilidade média</span>
+      <strong>{{ formatarPercentual(resumo().rentabilidadeMediaTotal) }} a.a</strong>
+      <small>Média das taxas usadas nas simulações</small>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Última simulação</span>
+      <strong>{{ formatarData(resumo().ultimaSimulacao) }}</strong>
+      <small>Último cenário criado</small>
+    </div>
+  </section>
+
+  
+
+  <section class="content-card">
+    <div class="section-header">
+      <div>
+        <h2>Simulações salvas</h2>
+        <p>Acompanhe seus cenários financeiros já calculados</p>
+      </div>
+    </div>
+
+    @if (simulacoes().length === 0) {
+        <div class="empty-state">
+            <h3>Nenhuma simulação salva ainda</h3>
+            <p>Crie sua primeira simulação para visualizar projeções e acompanhar seus resultados.</p>
+        
+
+            <button class="btn btn-primary" type="button" (click)="novaSimulacao()">
+                Criar primeira simulação
+            </button>
+        </div>
+    } @else {
+        <div class="table-wrapper">
+             <table>
+                <thead>
+                    <tr>
+                        <th>Simulação</th>
+                        <th>Valor inicial</th>
+                        <th>Aporte mensal</th>
+                        <th>Prazo</th>
+                        <th>Rentabilidade</th>
+                        <th>Resultado final</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (simulacao of simulacoesOrdenadas(); track simulacao.id) {
+                        <tr>
+                            <td>
+                                 <div class="simulation-name">
+                                    <strong>{{ simulacao.nome }}</strong>
+                                    <span>{{ simulacao.investimento }}</span>
+                                 </div>
+                            </td>
+
+                            <td>{{ formatarMoeda(simulacao.valorInicial) }}</td>
+
+                            <td>{{ formatarMoeda(simulacao.aporteMensal) }}</td>
+
+                            <td>{{ simulacao.periodoMeses }} meses</td>
+
+                            <td>
+                                <span class="badge">
+                                    {{ formatarPercentual(simulacao.taxaAnualUsada) }} a.a
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong class="result-value">
+                                    {{ formatarMoeda(simulacao.valorFinal) }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                <div class="actions">
+                                    <button
+                                        class="icon-btn"
+                                        type="button"
+                                        title="Ver detalhes"
+                                        (click)="verDetalhes(simulacao.id)">
+                                        👁
+                                    </button>
+                                    <button
+                                        class="icon-btn danger"
+                                        type="button"
+                                        title="Excluir simulação"
+                                        (click)="excluirSimulacao(simulacao.id)">
+                                        🗑
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+             </table>
+        </div>
+    }
+  </section>
+
+  @if (simulacoes().length > 0) {
+    <section class="simulation-cards">
+        @for (simulacao of melhoresSimulacoes(); track simulacao.id) {
+            <div class="simulation-card">
+                <div class="card-top">
+                    <div>
+                        <h3>{{ simulacao.nome }}</h3>
+                        <span>{{ simulacao.investimento }}</span>
+                    </div>
+
+                    <span class="risk-tag">
+                        {{ formatarPercentual(simulacao.taxaAnualUsada) }} a.a
+                    </span>
+                </div>
+
+                <div class="card-info">
+                    <div>
+                        <small>Valor inicial</small>
+                        <strong>{{ formatarMoeda(simulacao.valorInicial) }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Aporte mensal</small>
+                        <strong>{{ formatarMoeda(simulacao.aporteMensal) }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Prazo</small>
+                        <strong>{{ simulacao.periodoMeses }} meses</strong>
+                    </div>
+
+                    <div>
+                        <small>Resultado final</small>
+                        <strong>{{ formatarMoeda(simulacao.valorFinal) }}</strong>
+                    </div>
+                </div>
+                <button class="details-btn" type="button" (click)="verDetalhes(simulacao.id)">Ver detalhes e gráfico</button>
+            </div>
+        }
+    </section>
+    }   
+</div>

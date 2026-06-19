@@ -1,0 +1,200 @@
+<div class="new-simulation-page">
+
+  <section class="page-header">
+    <div>
+      <h1>Nova Simulação</h1>
+      <p>Crie um novo cenário de investimento e visualize sua projeção</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary" type="button" (click)="limparCampos()">
+        Limpar campos
+      </button>
+    </div>
+  </section>
+
+  @if (erro()) {
+    <div class="alert alert-error">
+        {{ erro() }}
+    </div>
+  }
+
+  <div class="simulation-layout">
+
+    <section class="form-card">
+      <form [formGroup]="formSimulacao" (ngSubmit)="calcularSimulacao()">
+
+        <div class="form-section">
+          <h2>1. Dados da simulação</h2>
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="nome">Nome da simulação</label>
+              <input
+                id="nome"
+                type="text"
+                formControlName="nome"
+                placeholder="Ex: Aposentadoria, Comprar carro..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="valorInicial">Valor inicial(R$)</label>
+              <input
+                id="valorInicial"
+                type="number"
+                min="0.01"
+                formControlName="valorInicial"
+                placeholder="0,00"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="aporteMensal">Aporte mensal(R$)</label>
+              <input
+                id="aporteMensal"
+                type="number"
+                min="0"
+                formControlName="aporteMensal"
+                placeholder="0,00"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="periodoMeses">Prazo(meses)</label>
+              <input
+                id="periodoMeses"
+                type="number"
+                min="1"
+                formControlName="periodoMeses"
+                placeholder="Ex: 12"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="objetivo">Objetivo</label>
+              <select id="objetivo" formControlName="objetivo">
+                <option value="">Selecione o objetivo</option>
+                <option value="RESERVA_EMERGENCIA">Reserva de emergência</option>
+                <option value="CURTO_PRAZO">Curto prazo</option>
+                <option value="MEDIO_PRAZO">Médio prazo</option>
+                <option value="LONGO_PRAZO">Longo prazo</option>
+                <option value="RENDA_MENSAL">Renda mensal</option>
+                <option value="CRESCIMENTO_PATRIMONIAL">Crescimento patrimonial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="nivelRiscoDesejado">Nível de risco desejado</label>
+              <select id="nivelRiscoDesejado" formControlName="nivelRiscoDesejado">
+                <option value="">Selecione o risco</option>
+                <option value="BAIXO">Baixo</option>
+                <option value="MEDIO">Médio</option>
+                <option value="ALTO">Alto</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-secondary" type="button" (click)="voltar()">
+            Cancelar
+          </button>
+
+          <button class="btn btn-primary" type="submit" [disabled]="calculando()">
+            {{ calculando() ? 'Calculando...' : 'Calcular projeção' }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <section class="result-card">
+      <div class="result-header">
+        <div>
+          <h2>Resultado da projeção</h2>
+          <p>O sistema recomendará automaticamente o investimento mais adequado.</p>
+        </div>
+      </div>
+
+      @if (resultado(); as resultado) {
+
+        <div class="recommended-investment">
+          <span>Investimento recomendado</span>
+          <strong>{{ resultado.investimentoRecomendado.nome }}</strong>
+          <p>{{ resultado.investimentoRecomendado.motivoRecomendacao }}</p>
+        </div>
+
+        <div class="summary-result-grid">
+          <div>
+            <small>Valor inicial</small>
+            <strong>{{ formatarMoeda(resultado.resumo.valorInicial) }}</strong>
+          </div>
+
+          <div>
+            <small>Aporte mensal</small>
+            <strong>{{ formatarMoeda(resultado.resumo.aporteMensal) }}</strong>
+          </div>
+
+          <div>
+            <small>Total investido</small>
+            <strong>{{ formatarMoeda(resultado.resumo.totalInvestido) }}</strong>
+          </div>
+
+          <div>
+            <small>Rendimento total</small>
+            <strong>{{ formatarMoeda(resultado.resumo.totalRendimento) }}</strong>
+          </div>
+
+          <div>
+            <small>Valor final</small>
+            <strong class="highlight-value">
+              {{ formatarMoeda(resultado.resumo.valorFinal) }}
+            </strong>
+          </div>
+
+          <div>
+            <small>Taxa mensal usada</small>
+            <strong>{{ formatarTaxaMensal(resultado.resumo.taxaMensalUsada) }}</strong>
+          </div>
+        </div>
+
+        <div class="projection-preview">
+          <h3>Prévia da evolução</h3>
+
+          <div class="chart-card">
+            <canvas
+            baseChart
+            [data]="lineChartData()"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+            </canvas>
+          </div>
+
+          <div class="projection-list">
+            @for (projecao of resultado.projecaoMensal.slice(0, 5); track projecao.mes) {
+              <div class="projection-item">
+                <span>Mês {{ projecao.mes }}</span>
+                <strong>{{ formatarMoeda(projecao.saldoFinal) }}</strong>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="save-actions">
+          <button class="btn btn-primary" type="button" (click)="salvarSimulacao()" [disabled]="salvando()">
+            {{ salvando() ? 'Salvando...' : 'Salvar simulação' }}
+          </button>
+        </div>
+
+      } @else {
+        <div class="empty-result">
+          <h3>Nenhuma projeção calculada</h3>
+          <p>Preencha os dados da simulação e clique em calcular para visualizar o resultado.</p>
+        </div>
+      }
+    </section>
+
+  </div>
+
+</div>
