@@ -4,6 +4,8 @@ import com.amanha.leprechaun_invest.domain.Investimento.*;
 import com.amanha.leprechaun_invest.domain.indicador.IndicadorFinanceiroService;
 import com.amanha.leprechaun_invest.domain.usuario.PerfilInvestidor;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
+import com.amanha.leprechaun_invest.infra.exception.RecursoNaoEncontradoException;
+import com.amanha.leprechaun_invest.infra.exception.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +102,7 @@ public class SimulacaoService {
                 .max(Comparator.comparingInt(
                         investimento -> calcularScore(investimento, perfilUsuario, request, horizonte)
                 ))
-                .orElseThrow(() -> new RuntimeException("Nenhum investimento compatível encontrado"));
+                .orElseThrow(() -> new RegraDeNegocioException("Nenhum investimento compatível encontrado"));
     }
 
     private boolean possuiValorMinimo(Investimento investimento, BigDecimal valorInicial) {
@@ -276,11 +278,11 @@ public class SimulacaoService {
         return toResponse(simulacaoSalva);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public SimulacaoResponse atualizar(Long id, SimulacaoAtualizarRequest request, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         SimulacaoRequest requestCalculo = new SimulacaoRequest(
                 request.valorInicial(),
@@ -356,7 +358,7 @@ public class SimulacaoService {
     public SimulacaoResponse buscarDetalhes(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         return toResponse(simulacao);
     }
@@ -406,7 +408,7 @@ public class SimulacaoService {
     public void deletar(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         simulacaoRepository.delete(simulacao);
     }

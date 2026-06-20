@@ -4,6 +4,8 @@ import com.amanha.leprechaun_invest.domain.simulacao.ProjecaoMensal;
 import com.amanha.leprechaun_invest.domain.simulacao.Simulacao;
 import com.amanha.leprechaun_invest.domain.simulacao.SimulacaoRepository;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
+import com.amanha.leprechaun_invest.infra.exception.RecursoNaoEncontradoException;
+import com.amanha.leprechaun_invest.infra.exception.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +44,18 @@ public class ComparacaoService {
 
     private void validarQuantidadeSimulacoes(List<Long> ids) {
         if (ids == null || ids.size() < 2 || ids.size() > 3) {
-            throw new RuntimeException("Selecione de 2 a 3 simulações para comparar.");
+            throw new RegraDeNegocioException("Selecione de 2 a 3 simulações para comparar.");
         }
 
         if (ids.stream().distinct().count() != ids.size()) {
-            throw new RuntimeException("Não é possível comparar a mesma simulação mais de uma vez.");
+            throw new RegraDeNegocioException("Não é possível comparar a mesma simulação mais de uma vez.");
         }
     }
 
     private Simulacao buscarSimulacaoDoUsuario(Long id, Usuario usuario) {
         return simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
     }
 
     private CenarioComparadoDTO toCenarioComparadoDTO(Simulacao simulacao) {

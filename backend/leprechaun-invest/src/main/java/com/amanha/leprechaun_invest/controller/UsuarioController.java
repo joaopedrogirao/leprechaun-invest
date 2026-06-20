@@ -50,18 +50,15 @@ public class UsuarioController
     }
 
     @PostMapping("/esqueci-minha-senha")
-    public ResponseEntity<?> solicitarRecuperacao(@RequestBody @Valid EmailRecuperacaoDTO dados) {
-        try {
-            usuarioService.solicitarRecuperacaoSenha(dados.email());
-            return ResponseEntity.ok("Se o e-mail existir, um token de recuperação será enviado.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<MensagemResponse> solicitarRecuperacao(@RequestBody @Valid EmailRecuperacaoDTO dados) {
+        usuarioService.solicitarRecuperacaoSenha(dados.email());
+
+        return ResponseEntity.ok(new MensagemResponse("Se o e-mail existir, um token de recuperação será enviado."));
     }
 
     @PostMapping("/redefinir-senha")
-    public ResponseEntity<?> redefinirSenha(@RequestBody @Valid NovaSenhaDTO dados) {
+    public ResponseEntity<MensagemResponse> redefinirSenha(@RequestBody @Valid NovaSenhaDTO dados) {
         usuarioService.redefinirSenha(dados.token(), dados.novaSenha());
-        return ResponseEntity.ok("Senha atualizada com sucesso!");
+        return ResponseEntity.ok(new MensagemResponse("Senha atualizada com sucesso!"));
     }
 }

@@ -29,6 +29,7 @@ public class SimulacaoController {
     @PostMapping("/calcular")
     public ResponseEntity<SimulacaoResponse> calcular(@Valid @RequestBody SimulacaoRequest request, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
+
         return ResponseEntity.ok(simulacaoService.calcular(request, usuario));
     }
 
@@ -54,22 +55,17 @@ public class SimulacaoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody SimulacaoAtualizarRequest dados, Authentication authentication) {
-        try {
-            Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
-            
-            SimulacaoResponse response = simulacaoService.atualizar(id, dados, usuarioLogado);
-            
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<SimulacaoResponse> atualizar(@PathVariable Long id, @Valid @RequestBody SimulacaoAtualizarRequest dados, Authentication authentication) {
+        Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
+
+        return ResponseEntity.ok(simulacaoService.atualizar(id, dados, usuario));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id, Authentication authentication){
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
         simulacaoService.deletar(id, usuario);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -83,6 +79,7 @@ public class SimulacaoController {
     @GetMapping("/resumo")
     public ResponseEntity<ResumoSimulacoesDTO> buscarResumoSimulacoes(Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
+
         return ResponseEntity.ok(simulacaoService.buscarResumo(usuario));
     }
 }
