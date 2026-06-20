@@ -79,6 +79,13 @@ public class SimulacaoService {
         );
 
         SimulacaoResponse response = new SimulacaoResponse(
+                null,
+                null,
+                request.objetivo().name(),
+                request.nivelRiscoDesejado().name(),
+                horizonte.name(),
+                taxaAnual,
+                null,
                 investimentoDTO,
                 resumo,
                 projecoes
@@ -398,6 +405,13 @@ public class SimulacaoService {
                 .toList();
 
         return new SimulacaoResponse(
+                simulacao.getId(),
+                simulacao.getNome(),
+                simulacao.getObjetivo().name(),
+                simulacao.getNivelRiscoDesejado().name(),
+                simulacao.getHorizonte().name(),
+                simulacao.getTaxaAnualUsada(),
+                simulacao.getDataCriacao(),
                 investimentoDTO,
                 resumo,
                 projecoes
