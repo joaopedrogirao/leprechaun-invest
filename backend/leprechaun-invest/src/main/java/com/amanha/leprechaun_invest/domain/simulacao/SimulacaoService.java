@@ -4,6 +4,9 @@ import com.amanha.leprechaun_invest.domain.Investimento.*;
 import com.amanha.leprechaun_invest.domain.indicador.IndicadorFinanceiroService;
 import com.amanha.leprechaun_invest.domain.usuario.PerfilInvestidor;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -314,6 +317,58 @@ public class SimulacaoService {
         return toResponse(simulacaoSalva);
     }
 
+    @Transactional
+    public SimulacaoResponse atualizar(Long id, SimulacaoAtualizarRequest request, Usuario usuario) {
+        Simulacao simulacao = simulacaoRepository
+                .findByIdAndUsuarioId(id, usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+
+        SimulacaoRequest requestCalculo = new SimulacaoRequest(
+                request.valorInicial(),
+                request.aporteMensal(),
+                request.periodoMeses(),
+                request.objetivo(),
+                request.nivelRiscoDesejado()
+        );
+
+        ResultadoCalculo resultado = executarCalculo(requestCalculo, usuario);
+        SimulacaoResponse response = resultado.response();
+        Investimento novoInvestimento = resultado.investimento();
+
+        simulacao.setNome(request.nome());
+        simulacao.setInvestimento(novoInvestimento);
+        simulacao.setValorInicial(request.valorInicial());
+        simulacao.setAporteMensal(request.aporteMensal());
+        simulacao.setPeriodoMeses(request.periodoMeses());
+        simulacao.setObjetivo(request.objetivo());
+        simulacao.setNivelRiscoDesejado(request.nivelRiscoDesejado());
+        simulacao.setHorizonte(resultado.horizonte());
+        
+        simulacao.setTaxaAnualUsada(resultado.taxaAnual());
+        simulacao.setTaxaMensalUsada(resultado.taxaMensal());
+        simulacao.setValorFinal(response.resumo().valorFinal());
+        simulacao.setTotalInvestido(response.resumo().totalInvestido());
+        simulacao.setTotalRendimento(response.resumo().totalRendimento());
+        simulacao.setCodigoApiUsado(novoInvestimento.getCodigoApi());
+
+        simulacao.getProjecoesMensais().clear(); 
+
+        for (ProjecaoMensalDTO dto : response.projecaoMensal()) {
+            ProjecaoMensal projecao = new ProjecaoMensal(
+                    dto.mes(),
+                    dto.saldoInicial(),
+                    dto.aporte(),
+                    dto.rendimento(),
+                    dto.saldoFinal()
+            );
+            simulacao.adicionarProjecao(projecao);
+        }
+
+        Simulacao simulacaoAtualizada = simulacaoRepository.save(simulacao);
+
+        return toResponse(simulacaoAtualizada);
+    }
+
     public List<SimulacaoListagemDTO> listarDoUsuario(Usuario usuario) {
         return simulacaoRepository
                 .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId())
@@ -340,7 +395,7 @@ public class SimulacaoService {
     public SimulacaoResponse buscarDetalhes(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
 
         return toResponse(simulacao);
     }
@@ -389,7 +444,7 @@ public class SimulacaoService {
     public void deletar(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
 
         simulacaoRepository.delete(simulacao);
     }

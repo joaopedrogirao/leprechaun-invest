@@ -52,6 +52,19 @@ public class SimulacaoController {
         return simulacaoService.listarDoUsuario(usuario);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody SimulacaoAtualizarRequest dados, Authentication authentication) {
+        try {
+            Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
+            
+            SimulacaoResponse response = simulacaoService.atualizar(id, dados, usuarioLogado);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id, Authentication authentication){
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
