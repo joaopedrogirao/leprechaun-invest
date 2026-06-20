@@ -1,6 +1,7 @@
 package com.amanha.leprechaun_invest.controller;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
+import com.amanha.leprechaun_invest.domain.simulacao.MensagemResponse;
 import com.amanha.leprechaun_invest.domain.usuario.CadastroDTO;
 import com.amanha.leprechaun_invest.domain.usuario.EmailRecuperacaoDTO;
 import com.amanha.leprechaun_invest.domain.usuario.NovaSenhaDTO;
@@ -23,13 +24,15 @@ public class UsuarioController
     private final UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<?> cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
+    public ResponseEntity<MensagemResponse> cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
         usuarioService.cadastrarUsuario(dados);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new MensagemResponse("Usuário cadastrado com sucesso!"));
     }
 
     @PostMapping("/me/perfil-investidor")
-    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Authentication authentication, @RequestBody QuizPerfilUsuarioDTO dados)
+    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Authentication authentication, @RequestBody @Valid QuizPerfilUsuarioDTO dados)
     {
         Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
         

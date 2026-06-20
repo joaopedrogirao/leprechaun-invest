@@ -6,6 +6,7 @@ import com.amanha.leprechaun_invest.domain.simulacao.SimulacaoRepository;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +17,7 @@ public class ComparacaoService {
     @Autowired
     private SimulacaoRepository simulacaoRepository;
 
+    @Transactional(readOnly = true)
     public ComparacaoSimulacoesResponse comparar(CompararSimulacoesRequest request, Usuario usuario) {
         validarQuantidadeSimulacoes(request.simulacaoIds());
 
@@ -41,6 +43,10 @@ public class ComparacaoService {
     private void validarQuantidadeSimulacoes(List<Long> ids) {
         if (ids == null || ids.size() < 2 || ids.size() > 3) {
             throw new RuntimeException("Selecione de 2 a 3 simulações para comparar.");
+        }
+
+        if (ids.stream().distinct().count() != ids.size()) {
+            throw new RuntimeException("Não é possível comparar a mesma simulação mais de uma vez.");
         }
     }
 

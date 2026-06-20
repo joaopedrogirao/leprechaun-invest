@@ -8,6 +8,7 @@ import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -26,30 +27,30 @@ public class SimulacaoController {
     private final ComparacaoService comparacaoService;
 
     @PostMapping("/calcular")
-    public SimulacaoResponse calcular(@Valid @RequestBody SimulacaoRequest request, Authentication authentication) {
+    public ResponseEntity<SimulacaoResponse> calcular(@Valid @RequestBody SimulacaoRequest request, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
-        return simulacaoService.calcular(request, usuario);
+        return ResponseEntity.ok(simulacaoService.calcular(request, usuario));
     }
 
     @PostMapping
-    public SimulacaoResponse salvar(@Valid @RequestBody SimulacaoSalvarRequest request, Authentication authentication) {
+    public ResponseEntity<SimulacaoResponse> salvar(@Valid @RequestBody SimulacaoSalvarRequest request, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
 
-        return simulacaoService.salvar(request, usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(simulacaoService.salvar(request, usuario));
     }
 
     @PostMapping("/comparar")
-    public ComparacaoSimulacoesResponse comparar(@RequestBody CompararSimulacoesRequest request, Authentication authentication) {
+    public ResponseEntity<ComparacaoSimulacoesResponse> comparar(@RequestBody CompararSimulacoesRequest request, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
 
-        return comparacaoService.comparar(request, usuario);
+        return ResponseEntity.ok(comparacaoService.comparar(request, usuario));
     }
 
     @GetMapping
-    public List<SimulacaoListagemDTO> listar(Authentication authentication) {
+    public ResponseEntity<List<SimulacaoListagemDTO>> listar(Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
 
-        return simulacaoService.listarDoUsuario(usuario);
+        return ResponseEntity.ok(simulacaoService.listarDoUsuario(usuario));
     }
 
     @DeleteMapping("/{id}")
@@ -60,10 +61,10 @@ public class SimulacaoController {
     }
 
     @GetMapping("/{id}")
-    public SimulacaoResponse buscarDetalhes(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<SimulacaoResponse> buscarDetalhes(@PathVariable Long id, Authentication authentication) {
         Usuario usuario = usuarioService.buscarUsuarioLogado(authentication);
 
-        return simulacaoService.buscarDetalhes(id, usuario);
+        return ResponseEntity.ok(simulacaoService.buscarDetalhes(id, usuario));
     }
 
     @GetMapping("/resumo")

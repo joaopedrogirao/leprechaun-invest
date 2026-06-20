@@ -1,7 +1,7 @@
 package com.amanha.leprechaun_invest.domain.usuario;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -96,6 +96,7 @@ public class UsuarioService implements UserDetailsService {
         usuario.atualizarSenha(senhaCriptografada);
     }
     
+    @Transactional(readOnly = true)
     public Usuario buscarUsuarioLogado(Authentication authentication) {
         String email = authentication.getName();
 
