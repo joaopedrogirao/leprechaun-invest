@@ -60,4 +60,11 @@ export class Simulation {
     );
   }
 
+  atualizarSimulacao(id: number, dados: SimulacaoSalvarRequest): Observable<SimulacaoDetalhes> {
+    return this.http.put<SimulacaoDetalhes>(
+      `${this.apiUrl}/${id}`,
+      dados,
+      {withCredentials: true}
+    );
+  }
 }
