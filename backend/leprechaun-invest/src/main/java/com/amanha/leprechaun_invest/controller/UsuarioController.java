@@ -1,6 +1,7 @@
 package com.amanha.leprechaun_invest.controller;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
+import com.amanha.leprechaun_invest.domain.simulacao.MensagemResponse;
 import com.amanha.leprechaun_invest.domain.usuario.CadastroDTO;
 import com.amanha.leprechaun_invest.domain.usuario.EmailRecuperacaoDTO;
 import com.amanha.leprechaun_invest.domain.usuario.NovaSenhaDTO;
@@ -23,13 +24,15 @@ public class UsuarioController
     private final UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<?> cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
+    public ResponseEntity<MensagemResponse> cadastrarUsuario(@RequestBody @Valid CadastroDTO dados) {
         usuarioService.cadastrarUsuario(dados);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new MensagemResponse("Usuário cadastrado com sucesso!"));
     }
 
     @PostMapping("/me/perfil-investidor")
-    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Authentication authentication, @RequestBody QuizPerfilUsuarioDTO dados)
+    public ResponseEntity<UsuarioDTO> definirPerfilInvestidor(Authentication authentication, @RequestBody @Valid QuizPerfilUsuarioDTO dados)
     {
         Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
         
@@ -47,18 +50,15 @@ public class UsuarioController
     }
 
     @PostMapping("/esqueci-minha-senha")
-    public ResponseEntity<?> solicitarRecuperacao(@RequestBody @Valid EmailRecuperacaoDTO dados) {
-        try {
-            usuarioService.solicitarRecuperacaoSenha(dados.email());
-            return ResponseEntity.ok("Se o e-mail existir, um token de recuperação será enviado.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<MensagemResponse> solicitarRecuperacao(@RequestBody @Valid EmailRecuperacaoDTO dados) {
+        usuarioService.solicitarRecuperacaoSenha(dados.email());
+
+        return ResponseEntity.ok(new MensagemResponse("Se o e-mail existir, um token de recuperação será enviado."));
     }
 
     @PostMapping("/redefinir-senha")
-    public ResponseEntity<?> redefinirSenha(@RequestBody @Valid NovaSenhaDTO dados) {
+    public ResponseEntity<MensagemResponse> redefinirSenha(@RequestBody @Valid NovaSenhaDTO dados) {
         usuarioService.redefinirSenha(dados.token(), dados.novaSenha());
-        return ResponseEntity.ok("Senha atualizada com sucesso!");
+        return ResponseEntity.ok(new MensagemResponse("Senha atualizada com sucesso!"));
     }
 }

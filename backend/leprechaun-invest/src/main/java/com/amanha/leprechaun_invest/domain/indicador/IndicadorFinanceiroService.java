@@ -101,7 +101,7 @@ public class IndicadorFinanceiroService {
     private BigDecimal taxaFallback(String codigoSerie) {
         return switch (codigoSerie) {
             case "432" -> BigDecimal.valueOf(10.50);
-            case "12" -> BigDecimal.valueOf(10.40);
+            case "12" -> BigDecimal.valueOf(0.0393);
             case "433" -> BigDecimal.valueOf(0.37);
             default -> BigDecimal.valueOf(10.00);
         };

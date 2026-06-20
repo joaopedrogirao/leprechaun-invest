@@ -4,11 +4,11 @@ import com.amanha.leprechaun_invest.domain.Investimento.*;
 import com.amanha.leprechaun_invest.domain.indicador.IndicadorFinanceiroService;
 import com.amanha.leprechaun_invest.domain.usuario.PerfilInvestidor;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
-
-import jakarta.transaction.Transactional;
-
+import com.amanha.leprechaun_invest.infra.exception.RecursoNaoEncontradoException;
+import com.amanha.leprechaun_invest.infra.exception.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,6 +29,7 @@ public class SimulacaoService {
     @Autowired
     private IndicadorFinanceiroService indicadorFinanceiroService;
 
+    @Transactional(readOnly = true)
     public SimulacaoResponse calcular(SimulacaoRequest request, Usuario usuario) {
         return executarCalculo(request, usuario).response();
     }
@@ -40,8 +41,6 @@ public class SimulacaoService {
         HorizonteInvestimento horizonte = converterPeriodoParaHorizonte(request.periodoMeses());
 
         Investimento investimentoRecomendado = recomendarInvestimento(perfilUsuario, request, horizonte);
-
-        //BigDecimal taxaAnual = buscarTaxaAnualTemporaria(investimentoRecomendado);
 
         BigDecimal taxaAnual = indicadorFinanceiroService.buscarTaxaAnual(investimentoRecomendado);
         BigDecimal taxaMensal = converterTaxaAnualParaMensal(taxaAnual);
@@ -103,7 +102,7 @@ public class SimulacaoService {
                 .max(Comparator.comparingInt(
                         investimento -> calcularScore(investimento, perfilUsuario, request, horizonte)
                 ))
-                .orElseThrow(() -> new RuntimeException("Nenhum investimento compatível encontrado"));
+                .orElseThrow(() -> new RegraDeNegocioException("Nenhum investimento compatível encontrado"));
     }
 
     private boolean possuiValorMinimo(Investimento investimento, BigDecimal valorInicial) {
@@ -164,45 +163,6 @@ public class SimulacaoService {
         return HorizonteInvestimento.LONGO;
     }
 
-//    private BigDecimal buscarTaxaAnualTemporaria(Investimento investimento){
-//
-//        /*
-//         * Primeira versão:
-//         * usa taxa temporária.
-//         *
-//         * Depois:
-//         * trocar isso por uma chamada para a API externa,
-//         * investimento.getCodigoApi().
-//         */
-//
-//        String codigoApi = investimento.getCodigoApi();
-//
-//        BigDecimal taxaBase = switch (codigoApi) {
-//            case "SELIC" -> BigDecimal.valueOf(10.50);
-//            case "CDI" -> BigDecimal.valueOf(10.40);
-//            case "IPCA" -> BigDecimal.valueOf(4.50);
-//            case "HGLG11" -> BigDecimal.valueOf(9.60);
-//            case "PETR4" -> BigDecimal.valueOf(14.00);
-//            case "BOVA11" -> BigDecimal.valueOf(12.00);
-//            default -> BigDecimal.valueOf(10.00);
-//        };
-//
-//        if (investimento.getIndexador() == Indexador.IPCA) {
-//            BigDecimal taxaFixa = investimento.getTaxaFixaAnual() != null
-//                    ? investimento.getTaxaFixaAnual()
-//                    : BigDecimal.ZERO;
-//
-//            return taxaBase.add(taxaFixa);
-//        }
-//
-//        if (investimento.getPercentualIndexador() != null) {
-//            return taxaBase
-//                    .multiply(investimento.getPercentualIndexador())
-//                    .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
-//        }
-//        return taxaBase;
-//    }
-
     private BigDecimal converterTaxaAnualParaMensal(BigDecimal taxaAnualPercentual) {
         double taxaAnualDecimal = taxaAnualPercentual
                 .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP)
@@ -261,6 +221,7 @@ public class SimulacaoService {
                 + " e respeita o nível de risco desejado.";
     }
 
+    @Transactional
     public SimulacaoResponse salvar(SimulacaoSalvarRequest request, Usuario usuario) {
 
         SimulacaoRequest requestCalculo = new SimulacaoRequest(
@@ -321,7 +282,7 @@ public class SimulacaoService {
     public SimulacaoResponse atualizar(Long id, SimulacaoAtualizarRequest request, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         SimulacaoRequest requestCalculo = new SimulacaoRequest(
                 request.valorInicial(),
@@ -343,7 +304,7 @@ public class SimulacaoService {
         simulacao.setObjetivo(request.objetivo());
         simulacao.setNivelRiscoDesejado(request.nivelRiscoDesejado());
         simulacao.setHorizonte(resultado.horizonte());
-        
+
         simulacao.setTaxaAnualUsada(resultado.taxaAnual());
         simulacao.setTaxaMensalUsada(resultado.taxaMensal());
         simulacao.setValorFinal(response.resumo().valorFinal());
@@ -351,7 +312,7 @@ public class SimulacaoService {
         simulacao.setTotalRendimento(response.resumo().totalRendimento());
         simulacao.setCodigoApiUsado(novoInvestimento.getCodigoApi());
 
-        simulacao.getProjecoesMensais().clear(); 
+        simulacao.getProjecoesMensais().clear();
 
         for (ProjecaoMensalDTO dto : response.projecaoMensal()) {
             ProjecaoMensal projecao = new ProjecaoMensal(
@@ -369,6 +330,7 @@ public class SimulacaoService {
         return toResponse(simulacaoAtualizada);
     }
 
+    @Transactional(readOnly = true)
     public List<SimulacaoListagemDTO> listarDoUsuario(Usuario usuario) {
         return simulacaoRepository
                 .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId())
@@ -392,10 +354,11 @@ public class SimulacaoService {
         );
     }
 
+    @Transactional(readOnly = true)
     public SimulacaoResponse buscarDetalhes(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         return toResponse(simulacao);
     }
@@ -441,14 +404,16 @@ public class SimulacaoService {
         );
     }
 
+    @Transactional
     public void deletar(Long id, Usuario usuario) {
         Simulacao simulacao = simulacaoRepository
                 .findByIdAndUsuarioId(id, usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Simulação não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Simulação não encontrada."));
 
         simulacaoRepository.delete(simulacao);
     }
 
+    @Transactional(readOnly = true)
     public ResumoSimulacoesDTO buscarResumo(Usuario usuario) {
         List<Simulacao> simulacoes = simulacaoRepository
                 .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId());
@@ -464,7 +429,7 @@ public class SimulacaoService {
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
 
-        BigDecimal rentabilidadeMediaTotal = simulacoes.stream()
+        BigDecimal taxaAnualMediaUsada = simulacoes.stream()
                 .map(Simulacao::getTaxaAnualUsada)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(BigDecimal.valueOf(totalSimulacoesSalvas), 2, RoundingMode.HALF_UP);
@@ -474,7 +439,7 @@ public class SimulacaoService {
                 .max(LocalDateTime::compareTo)
                 .orElse(null);
 
-        return new ResumoSimulacoesDTO(totalSimulacoesSalvas, melhorProjecao, rentabilidadeMediaTotal, ultimaSimulacao);
+        return new ResumoSimulacoesDTO(totalSimulacoesSalvas, melhorProjecao, taxaAnualMediaUsada, ultimaSimulacao);
     }
 
 }

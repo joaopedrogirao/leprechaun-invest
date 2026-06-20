@@ -1,7 +1,9 @@
 package com.amanha.leprechaun_invest.domain.usuario;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
-import jakarta.transaction.Transactional;
+import com.amanha.leprechaun_invest.infra.exception.RecursoNaoEncontradoException;
+import com.amanha.leprechaun_invest.infra.exception.RegraDeNegocioException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,7 +39,7 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public void cadastrarUsuario(CadastroDTO dados) {
         if (usuarioRepository.findByEmailIgnoreCase(dados.email()).isPresent()) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new RegraDeNegocioException("Email já cadastrado");
         }
 
         String senhaCripitografada = passwordEncoder.encode(dados.senha());
@@ -48,7 +50,7 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public UsuarioDTO definirPerfilInvestidor(Long idUsuario, QuizPerfilUsuarioDTO dados){
         Usuario usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("usuario não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("usuario não encontrado"));
 
         int pontuacao = dados.respostas()
                 .stream()
@@ -73,7 +75,7 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public void solicitarRecuperacaoSenha(String email) {
         Usuario usuario = usuarioRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado!"));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiracao = LocalDateTime.now().plusMinutes(30);
@@ -86,21 +88,22 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public void redefinirSenha(String token, String novaSenha) {
         Usuario usuario = usuarioRepository.findByTokenRecuperacao(token)
-                .orElseThrow(() -> new RuntimeException("Token inválido ou não encontrado!"));
+                .orElseThrow(() -> new RegraDeNegocioException("Token inválido ou não encontrado!"));
 
         if (usuario.getExpiracaoToken().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("O token expirou. Solicite a recuperação novamente.");
+            throw new RegraDeNegocioException("O token expirou. Solicite a recuperação novamente.");
         }
 
         String senhaCriptografada = passwordEncoder.encode(novaSenha);
         usuario.atualizarSenha(senhaCriptografada);
     }
-    
+
+    @Transactional(readOnly = true)
     public Usuario buscarUsuarioLogado(Authentication authentication) {
         String email = authentication.getName();
 
         return usuarioRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário logado não encontrado"));
     }
 
     private void enviarEmailRecuperacao(String emailDestino, String token) {

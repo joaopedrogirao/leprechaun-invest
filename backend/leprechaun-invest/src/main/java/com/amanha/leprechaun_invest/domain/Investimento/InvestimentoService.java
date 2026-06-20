@@ -1,7 +1,9 @@
 package com.amanha.leprechaun_invest.domain.Investimento;
 
+import com.amanha.leprechaun_invest.infra.exception.RecursoNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,6 +13,7 @@ public class InvestimentoService {
     @Autowired
     private InvestimentoRepository investimentoRepository;
 
+    @Transactional(readOnly = true)
     public List<InvestimentoDTO> listarTodos(){
         return investimentoRepository.findAll()
                 .stream()
@@ -18,8 +21,9 @@ public class InvestimentoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public InvestimentoDTO buscarPorId(long id){
-        Investimento investimento = investimentoRepository.findById(id).orElseThrow(()-> new RuntimeException("investimento não encontrado"));
+        Investimento investimento = investimentoRepository.findById(id).orElseThrow(()-> new RecursoNaoEncontradoException("investimento não encontrado"));
 
         return toResponse(investimento);
     }

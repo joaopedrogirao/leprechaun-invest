@@ -8,6 +8,7 @@ import com.amanha.leprechaun_invest.domain.simulacao.SimulacaoRepository;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,6 +24,7 @@ public class DashboardService {
     @Autowired
     private InvestimentoRepository investimentoRepository;
 
+    @Transactional(readOnly = true)
     public DashboardDTO montarDashboard(Usuario usuario) {
         List<Simulacao> simulacoes = simulacaoRepository
                 .findByUsuarioIdOrderByDataCriacaoDesc(usuario.getId());
@@ -101,6 +103,11 @@ public class DashboardService {
     }
 
     private List<RecomendacaoDashboardDTO> montarRecomendacoes(Usuario usuario) {
+
+        if (usuario.getPerfilInvestidor() == null) {
+            return List.of();
+        }
+
         return investimentoRepository
                 .findByPerfilRecomendado(usuario.getPerfilInvestidor())
                 .stream()
@@ -110,6 +117,7 @@ public class DashboardService {
                         montarTextoRentabilidade(investimento)
                 ))
                 .toList();
+
     }
 
     private String montarTextoRentabilidade(Investimento investimento) {
