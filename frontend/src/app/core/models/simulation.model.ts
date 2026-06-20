@@ -79,6 +79,14 @@ export interface ProjecaoMensal {
 }
 
 export interface SimulacaoDetalhes {
+  id: number | null;
+  nome: string | null;
+  objetivo: string;
+  nivelRiscoDesejado: string;
+  horizonte: string;
+  taxaAnualUsada: number;
+  dataCriacao: string | null;
+
   investimentoRecomendado: InvestimentoRecomendado;
   resumo: ResumoSimulacaoDetalhada;
   projecaoMensal: ProjecaoMensal[];

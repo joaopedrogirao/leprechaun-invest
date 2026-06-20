@@ -8,6 +8,12 @@
       <h1>Detalhes da simulação</h1>
       <p>Entenda a recomendação, o resultado financeiro e a evolução mensal da projeção.</p>
     </div>
+      <div class="page-actions">
+        <button type="button" class="edit-button" (click)="abrirModalEdicao()">
+          Editar simulação
+        </button>
+      </div>
+    
   </div>
 
   @if (carregando()) {
@@ -19,6 +25,20 @@
       {{ erro() }}
     </div>
   } @else if (detalhes(); as dados) {
+
+    <section class="simulation-info-card">
+      <div>
+        <span class="section-label">Simulação salva</span>
+        <h2>{{ dados.nome }}</h2>
+      </div>
+
+      <div class="simulation-meta">
+        <span>Objetivo: {{ formatarObjetivo(dados.objetivo) }}</span>
+        <span>Risco desejado: {{ formatarRisco(dados.nivelRiscoDesejado) }}</span>
+        <span>Horizonte: {{ formatarHorizonte(dados.horizonte) }}</span>
+        <span>Taxa anual usada: {{ formatarPercentual(dados.taxaAnualUsada) }} a.a.</span>
+      </div>
+    </section>
 
     <div class="details-layout">
       <div class="main-column">
@@ -184,47 +204,87 @@
           </div>
         </section>
       </div>
-
-      <aside class="side-column">
-        <section class="side-card">
-          <span class="section-label">Resumo da decisão</span>
-          <h2>Por que esse investimento?</h2>
-
-          <p>
-            A simulação usa o investimento recomendado pelo sistema com base nos dados informados,
-            como prazo, perfil de risco e objetivo financeiro.
-          </p>
-
-          <div class="side-info">
-            <div>
-              <span>Investimento</span>
-              <strong>{{ dados.investimentoRecomendado.nome }}</strong>
-            </div>
-
-            <div>
-              <span>Perfil indicado</span>
-              <strong>{{ formatarPerfil(dados.investimentoRecomendado.perfilRecomendado) }}</strong>
-            </div>
-
-            <div>
-              <span>Nível de risco</span>
-              <strong>{{ formatarRisco(dados.investimentoRecomendado.nivelRisco) }}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section class="side-card result-card">
-          <span class="section-label">Resultado estimado</span>
-
-          <div class="final-value">
-            {{ formatarMoeda(dados.resumo.valorFinal) }}
-          </div>
-
-          <p>
-            Valor final projetado ao término de {{ dados.resumo.periodoMeses }} meses.
-          </p>
-        </section>
-      </aside>
     </div>
+
+    @if (modalEdicaoAberto()) {
+      <div class="modal-overlay">
+        <div class="edit-modal">
+          <div class="modal-header">
+            <div>
+              <span class="section-label">Editar simulação</span>
+              <h2>Atualizar dados</h2>
+            </div>
+
+            <button type="button" class="close-button" (click)="fecharModalEdicao()">
+              ×
+            </button>
+          </div>
+
+          <p class="modal-description">
+            Altere os dados principais da simulação. Para mudanças maiores ou comparações,
+            o ideal é criar uma nova simulação.
+          </p>
+
+          @if (erroEdicao()) {
+            <div class="modal-error">
+              {{ erroEdicao() }}
+            </div>
+          }
+
+          <form [formGroup]="formEdicao" class="edit-form" (ngSubmit)="atualizarSimulacao()">
+            <div class="form-group">
+              <label>Nome da simulação</label>
+              <input type="text" formControlName="nome" />
+            </div>
+
+            <div class="form-group">
+              <label>Valor inicial (R$)</label>
+              <input type="number" min="0.01" formControlName="valorInicial" />
+            </div>
+
+            <div class="form-group">
+              <label>Aporte mensal (R$)</label>
+              <input type="number" min="0" formControlName="aporteMensal" />
+            </div>
+
+            <div class="form-group">
+              <label>Prazo (meses)</label>
+              <input type="number" min="1" formControlName="periodoMeses" />
+            </div>
+
+            <div class="form-group">
+              <label>Objetivo</label>
+              <select formControlName="objetivo">
+                <option value="RESERVA_EMERGENCIA">Reserva de emergência</option>
+                <option value="CURTO_PRAZO">Curto prazo</option>
+                <option value="MEDIO_PRAZO">Médio prazo</option>
+                <option value="LONGO_PRAZO">Longo prazo</option>
+                <option value="RENDA_MENSAL">Renda mensal</option>
+                <option value="CRESCIMENTO_PATRIMONIAL">Crescimento patrimonial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Nível de risco desejado</label>
+              <select formControlName="nivelRiscoDesejado">
+                <option value="BAIXO">Baixo</option>
+                <option value="MEDIO">Médio</option>
+                <option value="ALTO">Alto</option>
+              </select>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="cancel-button" (click)="fecharModalEdicao()">
+                Cancelar
+              </button>
+
+              <button type="submit" class="save-button" [disabled]="atualizando()">
+                {{ atualizando() ? 'Atualizando...' : 'Atualizar simulação' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
   }
 </section>
