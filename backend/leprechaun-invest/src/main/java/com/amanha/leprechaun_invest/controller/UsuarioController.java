@@ -48,8 +48,12 @@ public class UsuarioController
 
     @PostMapping("/esqueci-minha-senha")
     public ResponseEntity<?> solicitarRecuperacao(@RequestBody @Valid EmailRecuperacaoDTO dados) {
-        usuarioService.solicitarRecuperacaoSenha(dados.email());
-        return ResponseEntity.ok("Se o e-mail existir, um token de recuperação será enviado.");
+        try {
+            usuarioService.solicitarRecuperacaoSenha(dados.email());
+            return ResponseEntity.ok("Se o e-mail existir, um token de recuperação será enviado.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("/redefinir-senha")
