@@ -3,6 +3,7 @@ import { PublicLayout } from './layouts/public-layout/public-layout';
 import { PrivateLayout } from './layouts/private-layout/private-layout';
 import { authGuard } from './core/guards/auth-guard';
 import { noAuthGuard } from './core/guards/no-auth-guard';
+import { primeiroAcessoGuard } from './core/guards/primeiro-acesso-guard';
 
 export const routes: Routes = [
   {
@@ -19,7 +20,7 @@ export const routes: Routes = [
   {
     path: 'app',
     component: PrivateLayout,
-    canActivate: [authGuard],
+    canActivate: [authGuard, primeiroAcessoGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import ('./pages/private/dashboard/dashboard').then(m => m.Dashboard )},
       { path: 'simulacoes', loadComponent: () => import('./pages/private/simulations/simulations').then(m => m.Simulations) },

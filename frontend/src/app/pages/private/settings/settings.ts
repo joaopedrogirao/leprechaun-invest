@@ -115,6 +115,6 @@ export class Settings implements OnInit {
   }
 
   refazerQuestionario(): void {
-    this.router.navigate(['/questionario']);
+    this.router.navigate(['/questionario'], { queryParams: { refazer: 'true' } });
   }
 }

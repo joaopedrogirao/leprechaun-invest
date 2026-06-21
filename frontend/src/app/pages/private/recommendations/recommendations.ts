@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../core/services/auth';
 import { InvestmentService, InvestimentoDTO } from '../../../core/services/investment';
 
@@ -118,10 +117,26 @@ export class Recommendations implements OnInit {
   }
 
   private carregarDados(): void {
-    const usuario = this.authService.getUsuario();
+    this.authService.buscarUsuarioLogado().subscribe({
+      next: (usuario) => {
+        this.authService.salvarUsuario(usuario);
+        this.aplicarPerfil(usuario);
+        this.carregarInvestimentos();
+      },
+      error: () => {
+        const usuarioLocal = this.authService.getUsuario();
+        this.aplicarPerfil(usuarioLocal);
+        this.carregarInvestimentos();
+      },
+    });
+  }
+
+  private aplicarPerfil(usuario: any): void {
     const perfilUsuario = usuario?.perfilInvestidor ?? usuario?.perfil ?? 'MODERADO';
     this.perfil.set(perfilUsuario.toUpperCase());
+  }
 
+  private carregarInvestimentos(): void {
     this.investmentService.listarTodos().subscribe({
       next: (investimentos) => {
         this.todosInvestimentos.set(investimentos);

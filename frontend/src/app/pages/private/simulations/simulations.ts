@@ -105,6 +105,10 @@ export class Simulations implements OnInit {
     this.router.navigate(['/app/simulacoes/nova']);
   }
 
+  compararCenarios(): void {
+    this.router.navigate(['/app/comparar-cenarios']);
+  }
+
   verDetalhes(id: number): void {
     this.router.navigate(['/app/simulacoes', id]);
   }

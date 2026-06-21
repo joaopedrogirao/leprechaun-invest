@@ -1,1 +1,136 @@
-<p>profile-quiz works!</p>
+@if (exibirQuiz()) {
+  <div class="quiz-container">
+
+    <mat-card class="quiz-card">
+      <div class="quiz-header">
+        <mat-icon class="quiz-header-icon">psychology</mat-icon>
+        <h1>Descubra seu perfil de investidor</h1>
+        <p class="quiz-subtitle">
+          Responda {{ perguntas.length }} perguntas rápidas para descobrirmos
+          qual estratégia de investimento combina com você.
+        </p>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-info">
+          <span class="step-label">Pergunta {{ passoAtual() }} de {{ perguntas.length }}</span>
+          <span class="progress-percent">{{ progresso() }}%</span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progresso()"
+          class="quiz-progress-bar">
+        </mat-progress-bar>
+      </div>
+
+      <div class="step-indicators">
+        @for (pergunta of perguntas; track pergunta.titulo; let i = $index) {
+          <div
+            class="step-dot"
+            [class.active]="i + 1 === passoAtual()"
+            [class.completed]="i + 1 < passoAtual()">
+            @if (i + 1 < passoAtual()) {
+              <mat-icon class="step-check-icon">check</mat-icon>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+        }
+      </div>
+
+      <div class="question-section">
+        <div class="question-icon-wrapper">
+          <mat-icon class="question-icon">{{ perguntaAtual().icone }}</mat-icon>
+        </div>
+        <h2 class="question-text">{{ perguntaAtual().titulo }}</h2>
+        <p class="question-description">{{ perguntaAtual().descricao }}</p>
+
+        <div class="options-list">
+          @for (opcao of perguntaAtual().opcoes; track opcao.texto) {
+            <button
+              mat-stroked-button
+              class="option-button"
+              [disabled]="enviando()"
+              (click)="proximoPasso(opcao.pontos)">
+              <mat-icon class="option-icon">radio_button_unchecked</mat-icon>
+              <span class="option-text">{{ opcao.texto }}</span>
+              <mat-icon class="option-arrow">chevron_right</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (erro()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ erro() }}</span>
+        </div>
+      }
+
+      <div class="quiz-footer">
+        @if (passoAtual() > 1) {
+          <button
+            mat-stroked-button
+            class="btn-back"
+            [disabled]="enviando()"
+            (click)="voltarPasso()">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+          </button>
+        }
+
+        @if (enviando()) {
+          <div class="sending-indicator">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="24"
+              strokeWidth="3">
+            </mat-progress-spinner>
+            <span>Analisando seu perfil...</span>
+          </div>
+        }
+      </div>
+    </mat-card>
+
+  </div>
+} @else {
+  <div class="quiz-container">
+    <mat-card class="result-card">
+      <div class="result-content">
+        <div class="result-icon-wrapper">
+          <mat-icon class="result-icon">{{ perfilIcon }}</mat-icon>
+        </div>
+
+        <h1 class="result-title">Perfil definido com sucesso! 🎉</h1>
+
+        <div class="result-badge">
+          <mat-icon>{{ perfilIcon }}</mat-icon>
+          <span>{{ perfilLabel }}</span>
+        </div>
+
+        <p class="result-description">
+          Seu perfil de investidor é <strong>{{ perfilLabel }}</strong>.
+          Agora o sistema pode recomendar investimentos alinhados ao seu perfil.
+        </p>
+
+        <div class="result-actions">
+          <button
+            mat-flat-button
+            class="btn-dashboard"
+            (click)="irParaDashboard()">
+            <mat-icon>dashboard</mat-icon>
+            Ir para o Dashboard
+          </button>
+
+          <button
+            mat-stroked-button
+            class="btn-refazer"
+            (click)="refazerQuiz()">
+            <mat-icon>refresh</mat-icon>
+            Refazer questionário
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+}

@@ -35,8 +35,11 @@ export class AuthService {
   }
 
   getPrimeiroAcesso(): boolean {
-    return this.getUsuario()?.primeiroAcesso ?? false;
+    const usuario = this.getUsuario();
+    if (!usuario) return false;
+    return !usuario.perfilInvestidor;
   }
+
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('usuario');

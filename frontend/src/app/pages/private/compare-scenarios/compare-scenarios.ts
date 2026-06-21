@@ -41,7 +41,6 @@ export class CompareScenarios implements OnInit {
   ];
 
   lineChartType: 'line' = 'line';
-  chartColors = ['#2f7d43', '#1a6bb5', '#9a6a00'];
 
   lineChartData = signal<ChartConfiguration<'line'>['data']>({
     labels: [],
@@ -210,8 +209,6 @@ export class CompareScenarios implements OnInit {
       label: `Cenário ${index + 1} (${serie.nome})`,
       tension: 0.35,
       fill: false,
-      borderColor: this.chartColors[index],
-      backgroundColor: this.chartColors[index],
       borderDash: dashPatterns[index] || [],
       pointRadius: 3,
       pointHoverRadius: 6,
