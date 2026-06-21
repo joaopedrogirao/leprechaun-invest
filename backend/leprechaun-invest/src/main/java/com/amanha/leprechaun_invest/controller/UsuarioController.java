@@ -2,12 +2,14 @@ package com.amanha.leprechaun_invest.controller;
 
 import com.amanha.leprechaun_invest.domain.QuizPerfilDoUsuario.QuizPerfilUsuarioDTO;
 import com.amanha.leprechaun_invest.domain.simulacao.MensagemResponse;
+import com.amanha.leprechaun_invest.domain.usuario.AtualizarCadastroDTO;
 import com.amanha.leprechaun_invest.domain.usuario.CadastroDTO;
 import com.amanha.leprechaun_invest.domain.usuario.EmailRecuperacaoDTO;
 import com.amanha.leprechaun_invest.domain.usuario.NovaSenhaDTO;
 import com.amanha.leprechaun_invest.domain.usuario.Usuario;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioDTO;
 import com.amanha.leprechaun_invest.domain.usuario.UsuarioService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +39,16 @@ public class UsuarioController
         Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
         
         UsuarioDTO usuarioAtualizado = usuarioService.definirPerfilInvestidor(usuarioLogado.getId(), dados);
+        
+        return ResponseEntity.ok(usuarioAtualizado);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(Authentication authentication, @RequestBody @Valid AtualizarCadastroDTO dados)
+    {
+        Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
+        
+        UsuarioDTO usuarioAtualizado = usuarioService.atualizarUsuario(usuarioLogado.getId(), dados);
         
         return ResponseEntity.ok(usuarioAtualizado);
     }

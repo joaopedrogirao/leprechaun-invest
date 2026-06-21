@@ -39,7 +39,7 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public void cadastrarUsuario(CadastroDTO dados) {
         if (usuarioRepository.findByEmailIgnoreCase(dados.email()).isPresent()) {
-            throw new RegraDeNegocioException("Email já cadastrado");
+            throw new RegraDeNegocioException("Email já cadastrado!");
         }
 
         String senhaCripitografada = passwordEncoder.encode(dados.senha());
@@ -50,7 +50,7 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public UsuarioDTO definirPerfilInvestidor(Long idUsuario, QuizPerfilUsuarioDTO dados){
         Usuario usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("usuario não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado!"));
 
         int pontuacao = dados.respostas()
                 .stream()
@@ -68,6 +68,22 @@ public class UsuarioService implements UserDetailsService {
         }
 
         usuario.definirPerfilInvestidor(perfil);
+
+        return new UsuarioDTO(usuario);
+    }
+
+    @Transactional
+    public UsuarioDTO atualizarUsuario(Long idUsuario, AtualizarCadastroDTO dados) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado!"));
+
+        if (!usuario.getEmail().equalsIgnoreCase(dados.email()) && 
+            usuarioRepository.findByEmailIgnoreCase(dados.email()).isPresent()) {
+            throw new RegraDeNegocioException("Email já cadastrado!");
+        }
+
+        usuario.setNome(dados.nome());
+        usuario.setEmail(dados.email());
 
         return new UsuarioDTO(usuario);
     }
@@ -103,7 +119,7 @@ public class UsuarioService implements UserDetailsService {
         String email = authentication.getName();
 
         return usuarioRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário logado não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário logado não encontrado!"));
     }
 
     private void enviarEmailRecuperacao(String emailDestino, String token) {
