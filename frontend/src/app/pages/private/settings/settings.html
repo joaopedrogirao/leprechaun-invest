@@ -14,21 +14,17 @@
       </button>
 
       <button
-        mat-flat-button
-        class="btn-confirmar"
-        (click)="confirmarAlteracoes()"
+        mat-stroked-button
+        class="btn-alterar-senha"
+        (click)="irParaRecuperarSenha()"
       >
-        <mat-icon>check</mat-icon>
-        Confirmar Alterações
+        <mat-icon>lock_reset</mat-icon>
+        Alterar senha
       </button>
     </div>
   </div>
 
-  <mat-tab-group
-    class="settings-tabs"
-    [(selectedIndex)]="activeTabIndex"
-    animationDuration="300ms"
-  >
+  <mat-tab-group>
 
     <mat-tab label="Dados Pessoais">
       <div class="tab-content">
@@ -67,69 +63,24 @@
             </mat-form-field>
           </div>
 
-        </form>
-      </div>
-    </mat-tab>
-
-    <mat-tab label="Segurança">
-      <div class="tab-content">
-        <form [formGroup]="senhaForm" class="settings-form">
-
-          <div class="form-field-group">
-            <label class="field-label">Nova Senha</label>
-            <mat-form-field appearance="outline" class="campo">
-              <input
-                matInput
-                [type]="novaSenhaVisivel ? 'text' : 'password'"
-                formControlName="novaSenha"
-                placeholder="Digite sua nova senha"
-              />
-              <button
-                mat-icon-button
-                matSuffix
-                type="button"
-                (click)="toggleNovaSenha()"
-              >
-                <mat-icon>{{ novaSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-              @if (senhaForm.get('novaSenha')?.hasError('required') && senhaForm.get('novaSenha')?.touched) {
-                <mat-error>A senha é obrigatória</mat-error>
-              }
-              @if (senhaForm.get('novaSenha')?.hasError('minlength') && senhaForm.get('novaSenha')?.touched) {
-                <mat-error>A senha deve ter pelo menos 6 caracteres</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <div class="form-field-group">
-            <label class="field-label">Confirmar Senha</label>
-            <mat-form-field appearance="outline" class="campo">
-              <input
-                matInput
-                [type]="confirmarSenhaVisivel ? 'text' : 'password'"
-                formControlName="confirmarSenha"
-                placeholder="Digite sua senha novamente"
-              />
-              <button
-                mat-icon-button
-                matSuffix
-                type="button"
-                (click)="toggleConfirmarSenha()"
-              >
-                <mat-icon>{{ confirmarSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-              @if (senhaForm.get('confirmarSenha')?.hasError('required') && senhaForm.get('confirmarSenha')?.touched) {
-                <mat-error>A confirmação é obrigatória</mat-error>
-              }
-              @if (senhaForm.hasError('senhasNaoConferem') && senhaForm.get('confirmarSenha')?.touched) {
-                <mat-error>As senhas não coincidem</mat-error>
-              }
-            </mat-form-field>
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              class="btn-salvar"
+              [disabled]="dadosForm.invalid || dadosForm.pristine || salvando"
+              (click)="salvarDados()"
+            >
+                  <mat-icon>save</mat-icon>
+                  Confirmar Alterações
+                
+            </button>
           </div>
 
         </form>
       </div>
     </mat-tab>
+
+    
 
   </mat-tab-group>
 

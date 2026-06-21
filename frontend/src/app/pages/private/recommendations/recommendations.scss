@@ -290,6 +290,18 @@
   }
 }
 
+.btn-outline {
+  background: transparent;
+  color: #5f6f64;
+  border: 1px solid #dfe8df;
+
+  &:hover {
+    background: #f7faf7;
+    color: #2f7d43;
+    border-color: #cddccd;
+  }
+}
+
 .bottom-section {
   display: grid;
   grid-template-columns: 1fr;

@@ -1,0 +1,75 @@
+<div class="dialog-container">
+  @if (carregando()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Buscando detalhes do investimento...</p>
+    </div>
+  } @else if (erro()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ erro() }}</p>
+      <button mat-button (click)="fechar()">Fechar</button>
+    </div>
+  } @else if (investimento(); as inv) {
+    <div class="dialog-header">
+      <h2 mat-dialog-title>{{ inv.nome }}</h2>
+      <button mat-icon-button (click)="fechar()" class="btn-close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-dialog-content class="dialog-content">
+      <div class="badges-row">
+        <span class="chip chip-tipo">{{ formatarTipo(inv.tipo) }}</span>
+        <span class="chip chip-risco"
+              [style.color]="getCorRisco(inv.nivelRisco)"
+              [style.backgroundColor]="getBgRisco(inv.nivelRisco)">
+          Risco: {{ formatarRisco(inv.nivelRisco) }}
+        </span>
+      </div>
+
+      <div class="info-section">
+        <h3>Detalhes Financeiros</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Indexador</span>
+            <strong class="value">{{ inv.indexador }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="label">Investimento Mínimo</span>
+            <strong class="value">{{ formatarMoeda(inv.valorMinimo) }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="label">Liquidez</span>
+            <strong class="value">{{ formatarLiquidez(inv.liquidez) }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="label">Horizonte Recomendado</span>
+            <strong class="value">{{ formatarHorizonte(inv.horizonteRecomendado) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3>Sobre este investimento</h3>
+        <p class="descricao">{{ inv.descricao }}</p>
+        
+        <div class="perfil-box">
+          <mat-icon>emoji_objects</mat-icon>
+          <div class="perfil-text">
+            <strong>Ideal para o objetivo:</strong>
+            <span>{{ formatarObjetivo(inv.objetivoRecomendado) }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button mat-button (click)="fechar()">Voltar</button>
+      <button mat-flat-button color="primary" (click)="simular()">
+        <mat-icon>show_chart</mat-icon>
+        Simular com este investimento
+      </button>
+    </mat-dialog-actions>
+  }
+</div>

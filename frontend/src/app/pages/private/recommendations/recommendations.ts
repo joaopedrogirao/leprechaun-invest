@@ -4,10 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { InvestmentService, InvestimentoDTO } from '../../../core/services/investment';
-
+import { InvestmentDetailsDialog } from './investment-details-dialog/investment-details-dialog';
 interface PerfilConfig {
   nome: string;
   descricao: string;
@@ -37,6 +38,7 @@ interface ResumoCategoria {
     MatButtonModule,
     MatChipsModule,
     MatTooltipModule,
+    MatDialogModule,
   ],
   templateUrl: './recommendations.html',
   styleUrl: './recommendations.scss',
@@ -45,6 +47,7 @@ export class Recommendations implements OnInit {
   private authService = inject(AuthService);
   private investmentService = inject(InvestmentService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   carregando = signal(true);
   erro = signal('');
@@ -296,6 +299,15 @@ export class Recommendations implements OnInit {
 
   verDetalhes(inv: InvestimentoDTO): void {
     this.router.navigate(['/app/simulacoes/nova']);
+  }
+
+  abrirDetalhes(id: number): void {
+    this.dialog.open(InvestmentDetailsDialog, {
+      data: { id },
+      width: '100%',
+      maxWidth: '600px',
+      panelClass: 'investment-details-dialog-panel'
+    });
   }
 
   irParaSimulacoes(): void {

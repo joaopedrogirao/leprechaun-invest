@@ -55,6 +55,10 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  atualizarCadastro(dados: { nome: string; email: string }) {
+    return this.http.put<any>('/usuarios/me', dados);
+  }
+
   solicitarRecuperacaoSenha(email: string) {
     return this.http.post<{ mensagem: string }>('/usuarios/esqueci-minha-senha', { email });
   }
