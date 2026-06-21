@@ -41,6 +41,16 @@ public class UsuarioController
         return ResponseEntity.ok(usuarioAtualizado);
     }
 
+    @PutMapping("/me/perfil-investidor")
+    public ResponseEntity<UsuarioDTO> refazerPerfilInvestidor(Authentication authentication, @RequestBody @Valid QuizPerfilUsuarioDTO dados)
+    {
+        Usuario usuarioLogado = usuarioService.buscarUsuarioLogado(authentication);
+        
+        UsuarioDTO usuarioAtualizado = usuarioService.definirPerfilInvestidor(usuarioLogado.getId(), dados);
+        
+        return ResponseEntity.ok(usuarioAtualizado);
+    }
+
     @GetMapping("/me")
     public ResponseEntity<UsuarioDTO> buscarPerfilLogado(Authentication authentication)
     {
