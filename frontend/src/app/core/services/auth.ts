@@ -18,7 +18,7 @@ export class AuthService {
   }
 
   register(dados: any) {
-    return this.http.post('/usuarios', dados);
+    return this.http.post('/usuarios', dados, { responseType: 'text' });
   }
 
   buscarUsuarioLogado() {
@@ -50,5 +50,13 @@ export class AuthService {
     this.http.post('/logout', {}).subscribe();
     this.limparSessaoLocal();
     this.router.navigate(['/login']);
+  }
+
+  solicitarRecuperacaoSenha(email: string) {
+    return this.http.post<{ mensagem: string }>('/usuarios/esqueci-minha-senha', { email });
+  }
+
+  redefinirSenha(token: string, novaSenha: string) {
+    return this.http.post<{ mensagem: string }>('/usuarios/redefinir-senha', { token, novaSenha });
   }
 }

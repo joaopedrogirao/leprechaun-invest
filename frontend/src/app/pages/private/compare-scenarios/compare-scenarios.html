@@ -1,1 +1,149 @@
-<p>compare-scenarios works!</p>
+<section class="compare-page">
+
+  <div class="compare-header">
+    <div>
+      <h1>Comparar cenários</h1>
+      <p class="compare-subtitle">
+        Compare até 3 simulações e escolha o melhor cenário para o seu objetivo.
+      </p>
+    </div>
+    <div class="header-actions">
+      <a href="/app/simulacoes" class="btn-outline">+ Nova simulação</a>
+      <button class="btn-outline" (click)="limparComparacao()">🔄 Limpar</button>
+    </div>
+  </div>
+
+  @if (carregando()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Carregando simulações...</p>
+    </div>
+  }
+
+  @if (erroCarregamento()) {
+    <div class="error-banner">
+      <span>⚠️</span>
+      <p>{{ erroCarregamento() }}</p>
+    </div>
+  }
+
+  @if (!carregando()) {
+    <div class="selection-panel">
+      <h3>Selecione as simulações para comparar</h3>
+
+      <div class="selection-grid">
+        <div class="scenario-select">
+          <label>Cenário 1</label>
+          <select [(ngModel)]="cenario1Id" (ngModelChange)="compararSeValido()">
+            <option [ngValue]="null">Selecionar simulação...</option>
+            @for (sim of simulacoesFiltradas([cenario2Id, cenario3Id]); track sim.id) {
+              <option [ngValue]="sim.id">{{ sim.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="scenario-select">
+          <label>Cenário 2</label>
+          <select [(ngModel)]="cenario2Id" (ngModelChange)="compararSeValido()">
+            <option [ngValue]="null">Selecionar simulação...</option>
+            @for (sim of simulacoesFiltradas([cenario1Id, cenario3Id]); track sim.id) {
+              <option [ngValue]="sim.id">{{ sim.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="scenario-select">
+          <label>Cenário 3 <span class="optional-label">(opcional)</span></label>
+          <select [(ngModel)]="cenario3Id" (ngModelChange)="compararSeValido()">
+            <option [ngValue]="null">Selecionar simulação...</option>
+            @for (sim of simulacoesFiltradas([cenario1Id, cenario2Id]); track sim.id) {
+              <option [ngValue]="sim.id">{{ sim.nome }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (!podeComparar()) {
+        <p class="hint-text">Selecione pelo menos 2 simulações para iniciar a comparação.</p>
+      }
+    </div>
+
+    @if (comparando()) {
+      <div class="loading-container small">
+        <div class="loading-spinner"></div>
+        <p>Comparando cenários...</p>
+      </div>
+    }
+
+    @if (cenarios().length > 0 && !comparando()) {
+      <div class="comparison-panel">
+        <h3>Comparação de Resultados</h3>
+
+        <div class="table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Indicador</th>
+                @for (cenario of cenarios(); track cenario.id; let i = $index) {
+                  <th>
+                    <span class="th-label">Cenário {{ i + 1 }}</span>
+                    <span class="th-name">({{ cenario.nome }})</span>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (ind of indicadores; track ind.label; let isLast = $last) {
+                <tr [class.highlight-row]="ind.campo === 'valorFinal'">
+                  <td class="indicator-cell">{{ ind.label }}</td>
+                  @for (cenario of cenarios(); track cenario.id) {
+                    <td
+                      class="value-cell"
+                      [class.highlight-value]="ind.campo === 'valorFinal'"
+                    >
+                      {{ formatarValorCenario(cenario, ind.campo, ind.formato) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <h3>Evolução do montante ao longo do tempo</h3>
+        <div class="chart-container">
+          <canvas
+            baseChart
+            [data]="lineChartData()"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="footer-panel">
+        <div class="observations">
+          <h3>Observações</h3>
+          <ul>
+            <li>Os resultados são projeções baseadas nas taxas de rendimento informadas.</li>
+            <li>O desempenho real pode variar de acordo com o mercado.</li>
+          </ul>
+        </div>
+        <button class="btn-export" (click)="exportarComparacao()">
+          📥 Exportar comparação
+        </button>
+      </div>
+    }
+
+    @if (cenarios().length === 0 && !comparando() && simulacoesDisponiveis().length === 0) {
+      <div class="empty-state">
+        <h3>Nenhuma simulação encontrada</h3>
+        <p>Crie pelo menos 2 simulações para poder comparar cenários.</p>
+        <a href="/app/simulacoes" class="btn-primary">Criar simulação</a>
+      </div>
+    }
+  }
+
+</section>

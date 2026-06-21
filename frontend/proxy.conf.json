@@ -10,5 +10,9 @@
   "/usuarios": {
     "target": "http://localhost:8080",
     "secure": false
+  },
+  "/investimentos": {
+    "target": "http://localhost:8080",
+    "secure": false
   }
 }

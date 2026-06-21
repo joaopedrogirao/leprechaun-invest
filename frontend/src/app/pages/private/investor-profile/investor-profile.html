@@ -1,1 +1,127 @@
-<p>investor-profile works!</p>
+<section class="profile-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Perfil do investidor</h1>
+      <p class="page-subtitle">
+        Gerencie suas informações pessoais e perfil de investidor.
+      </p>
+    </div>
+  </div>
+
+  <div class="top-row">
+
+    <div class="card profile-card">
+      <div class="profile-card-content">
+        <div class="avatar-area">
+          <div class="avatar">
+            <mat-icon class="avatar-icon">account_circle</mat-icon>
+          </div>
+        </div>
+
+        <div class="profile-info">
+          <div class="profile-name-row">
+            <h2>{{ usuario()?.nome ?? 'Usuário' }}</h2>
+            <button mat-stroked-button class="btn-editar" (click)="editarPerfil()">
+              <mat-icon>edit</mat-icon>
+              Editar
+            </button>
+          </div>
+
+          <div class="profile-details">
+            <div class="detail-item">
+              <mat-icon>email</mat-icon>
+              <span>{{ usuario()?.email ?? 'email@exemplo.com' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card investor-profile-card">
+      <div class="investor-profile-header">
+        <h3>Seu Perfil de Investidor</h3>
+      </div>
+
+      <div class="investor-profile-content">
+        <div class="profile-type-icon">
+          <mat-icon>{{ perfilInfo().icone }}</mat-icon>
+        </div>
+
+        <div class="profile-type-info">
+          <h2 class="profile-type-name">{{ perfilInfo().tipo }}</h2>
+          <p class="profile-type-desc">{{ perfilInfo().descricao }}</p>
+        </div>
+      </div>
+
+      <div class="profile-characteristics">
+        <span class="characteristics-label">Características principais:</span>
+        <div class="chips-row">
+          @for (caract of perfilInfo().caracteristicas; track caract) {
+            <mat-chip-set>
+              <mat-chip>
+                <mat-icon matChipAvatar>check_circle</mat-icon>
+                {{ caract }}
+              </mat-chip>
+            </mat-chip-set>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="middle-row">
+
+    <div class="card info-card">
+      <div class="card-header">
+        <h3>Informações Pessoais</h3>
+        <button mat-stroked-button class="btn-editar-small" (click)="editarPerfil()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+      </div>
+
+      <div class="info-list">
+        @for (info of informacoesPessoais(); track info.label) {
+          <div class="info-item">
+            <div class="info-item-label">
+              <mat-icon>{{ info.icone }}</mat-icon>
+              <span>{{ info.label }}</span>
+            </div>
+            <span class="info-item-valor">{{ info.valor }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-footer">
+        <mat-icon>lock</mat-icon>
+        <span>Seus dados estão protegidos e criptografados.</span>
+      </div>
+    </div>
+
+    <div class="card questionario-card">
+      <div class="card-header">
+        <h3>Questionário do Perfil</h3>
+      </div>
+
+      <div class="questionario-list">
+        <div class="questionario-item">
+          <mat-icon>psychology</mat-icon>
+          <span class="questionario-label">Perfil atual</span>
+          <span class="questionario-valor">{{ perfilInfo().tipo }}</span>
+        </div>
+      </div>
+
+      <button
+        mat-stroked-button
+        class="btn-ver-respostas"
+        (click)="refazerQuestionario()"
+      >
+        Refazer questionário
+      </button>
+    </div>
+
+  </div>
+
+</section>

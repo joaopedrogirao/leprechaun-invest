@@ -93,9 +93,14 @@ export class Register {
       error: (error) => {
         this.carregando = false;
 
+        if (error.error?.erro) {
+          this.erroMensagem = error.error.erro;
+          return;
+        }
+
         const mensagens: Record<number, string> = {
-          409: 'Este e-mail já está cadastrado.',
           400: 'Dados inválidos. Verifique os campos.',
+          409: 'Este e-mail já está cadastrado.',
           500: 'Erro no servidor. Tente novamente mais tarde.',
         };
 

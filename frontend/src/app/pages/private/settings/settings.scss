@@ -15,9 +15,11 @@
 }
 
 .settings-title {
-  font: var(--mat-sys-headline-medium);
-  color: var(--mat-sys-on-surface);
   margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 2rem;
 }
 
 .settings-actions {

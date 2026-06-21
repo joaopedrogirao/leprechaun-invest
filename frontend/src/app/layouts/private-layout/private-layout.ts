@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,6 +24,13 @@ interface NavItem {
 })
 export class PrivateLayout {
   private authService = inject(AuthService);
+
+  nomeUsuario = signal('');
+
+  ngOnInit():void{
+    const usuario = this.authService.getUsuario();
+    this.nomeUsuario.set(usuario?.nome?.split(' ')[0] ?? 'Usuário');
+  }
 
   navItems: NavItem[] = [
     { icon: 'dashboard',        label: 'Dashboard',            route: '/app/dashboard' },
