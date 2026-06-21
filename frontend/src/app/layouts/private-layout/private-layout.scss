@@ -59,6 +59,7 @@ $topbar-height: 60px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-bottom: 0.5rem;
 }
 
 .nav-link {
@@ -109,6 +110,7 @@ $topbar-height: 60px;
 .sidebar-bottom {
   padding-top: 0.5rem;
   border-top: 1px solid var(--mat-sys-outline-variant);
+  margin-bottom: auto;
 }
 
 .nav-link--logout {
@@ -151,19 +153,11 @@ $topbar-height: 60px;
   color: var(--mat-sys-on-surface-variant) !important;
 }
 
-.avatar-placeholder {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--mat-sys-primary-container);
-  border: 2px solid var(--mat-sys-outline-variant);
-}
-
 
 .page-content {
   flex: 1;
   overflow-y: auto;
-  background: var(--mat-sys-surface);
+  background: var(--mat-sys-surface-container-lowest);
 }
 
 
@@ -191,4 +185,9 @@ $topbar-height: 60px;
   }
 
 
+}
+
+.nome-usuario{
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-title-small);
 }

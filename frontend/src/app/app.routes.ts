@@ -13,6 +13,7 @@ export const routes: Routes = [
       { path: 'login', canActivate: [noAuthGuard], loadComponent: () => import('./pages/public/login/login').then(m => m.Login) },
       { path: 'cadastro', canActivate: [noAuthGuard],  loadComponent: () => import('./pages/public/register/register').then(m => m.Register) },
       { path: 'esqueci-senha', canActivate: [noAuthGuard], loadComponent: () => import('./pages/public/forgot-password/forgot-password').then(m => m.ForgotPassword)},
+      { path: 'redefinir-senha', canActivate: [noAuthGuard], loadComponent: () => import('./pages/public/reset-password/reset-password').then(m => m.ResetPassword)},
     ]
   },
   {

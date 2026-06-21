@@ -5,10 +5,11 @@
 }
 
 .page-title {
-  font: var(--mat-sys-headline-large);
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
   color: var(--mat-sys-on-surface);
-  margin: 0 0 2rem;
-  letter-spacing: -0.3px;
+  margin-bottom: 3rem;
 }
 
 .section-card {
@@ -140,9 +141,6 @@ mat-panel-title {
   --mdc-chip-elevated-container-color: var(--mat-sys-tertiary-container) !important;
 }
 
-
-
-/* ─── Responsive ─── */
 
 @media (max-width: 600px) {
   .education-page {

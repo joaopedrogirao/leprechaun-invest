@@ -4,8 +4,7 @@
   min-height: 100%;
   padding: 28px;
   box-sizing: border-box;
-  background: #f5f8f4;
-  color: #1f2d24;
+  color: var(--mat-sys-on-surface);
   overflow-x: hidden;
 }
 
@@ -21,7 +20,7 @@
   margin: 0;
   font-size: 36px;
   font-weight: 800;
-  color: #183322;
+  color: var(--mat-sys-on-surface);
 }
 
 .dashboard-subtitle {

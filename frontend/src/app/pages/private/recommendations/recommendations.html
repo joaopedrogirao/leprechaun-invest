@@ -1,1 +1,148 @@
-<p>recommendations works!</p>
+<section class="recommendations-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Recomendações para o seu perfil</h1>
+      <p class="page-subtitle">
+        Com base no seu perfil de investidor, selecionamos investimentos adequados para o seu tipo de investimento.
+      </p>
+    </div>
+
+    <div class="profile-badge">
+      <div class="badge-icon-area">
+        <mat-icon class="badge-icon">{{ perfilConfig().icone }}</mat-icon>
+      </div>
+      <div class="badge-info">
+        <strong>{{ perfilConfig().nome }}</strong>
+        <span>{{ perfilConfig().descricao }}</span>
+      </div>
+      <div class="badge-risk">
+        <span class="risk-label">Nível de Risco</span>
+        <strong>{{ perfilConfig().nivelRisco }}</strong>
+      </div>
+    </div>
+  </div>
+
+  @if (carregando()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Carregando recomendações...</p>
+    </div>
+  }
+
+  @if (erro()) {
+    <div class="error-banner">
+      <mat-icon>warning</mat-icon>
+      <p>{{ erro() }}</p>
+    </div>
+  }
+
+  @if (!carregando() && !erro()) {
+
+    @if (recomendacoes().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <h3>Nenhuma recomendação encontrada</h3>
+        <p>Não encontramos investimentos compatíveis com o seu perfil no momento.</p>
+      </div>
+    } @else {
+
+      <div class="investments-grid">
+        @for (rec of recomendacoes(); track rec.investimento.id) {
+          <div class="investment-card">
+
+            <div class="card-header">
+              <div class="card-icon-area">
+                <mat-icon class="card-icon">{{ getIconePorTipo(rec.investimento.tipo) }}</mat-icon>
+              </div>
+              <div class="card-title-area">
+                <h3>{{ formatarTipo(rec.investimento.tipo) }}</h3>
+                <span
+                  class="risk-chip"
+                  [style.color]="getCorRisco(rec.investimento.nivelRisco)"
+                  [style.background]="getBgRisco(rec.investimento.nivelRisco)"
+                >
+                  Risco: {{ formatarRisco(rec.investimento.nivelRisco) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="destaque-area">
+                <span class="destaque-label">{{ rec.destaque }}</span>
+                <strong class="destaque-value">{{ rec.destaqueValor }}</strong>
+              </div>
+
+              <div class="ideal-area">
+                <span class="ideal-label">Ideal para:</span>
+                <strong class="ideal-value">{{ rec.idealPara }}</strong>
+              </div>
+            </div>
+
+            <div class="card-details">
+              <div class="detail-row">
+                <span>Horizonte</span>
+                <strong>{{ formatarHorizonte(rec.investimento.horizonteRecomendado) }}</strong>
+              </div>
+              <div class="detail-row">
+                <span>Liquidez</span>
+                <strong>{{ formatarLiquidez(rec.investimento.liquidez) }}</strong>
+              </div>
+            </div>
+
+            @if (rec.investimento.descricao) {
+              <p class="card-description">{{ rec.investimento.descricao }}</p>
+            }
+
+            <div class="card-actions">
+              <button class="btn btn-secondary" type="button" (click)="verDetalhes(rec.investimento)">
+                <mat-icon>show_chart</mat-icon>
+                Simular
+              </button>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <div class="bottom-section">
+
+        <div class="summary-panel">
+          <h3>Resumo das recomendações</h3>
+          <p class="summary-subtitle">Diversifique sua carteira conforme sua tolerância ao risco.</p>
+
+          <div class="category-list">
+            @for (cat of resumoCategorias(); track cat.nome) {
+              <div class="category-item">
+                <div class="category-dot" [style.background]="cat.cor"></div>
+                <div class="category-info">
+                  <div class="category-header">
+                    <strong>{{ cat.nome }}</strong>
+                    <span class="category-pct">{{ cat.percentual }}%</span>
+                  </div>
+                  <span class="category-desc">{{ cat.descricao }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="dica-box">
+            <mat-icon class="dica-icon">lightbulb</mat-icon>
+            <span>Dica: Você pode ajustar suas simulações para testar diferentes cenários!</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="disclaimer">
+        <mat-icon class="disclaimer-icon">warning_amber</mat-icon>
+        <div>
+          <p>As recomendações não são garantias de rentabilidade. Os investimentos possuem riscos.</p>
+          <strong>Estude sempre antes de investir e diversifique sua carteira.</strong>
+        </div>
+      </div>
+
+    }
+  }
+
+</section>
